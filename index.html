@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<style>
+    .sendButton {
+        width: 100px;
+        height: 30px;
+        background-color: blue;
+        color: black;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        cursor: pointer;
+        font-size: large;
+    }
+
+    .title {
+        color: black;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
+    .center {
+        text-align: center;
+    }
+</style>
+
+<html>
+
+    <head>
+        <title>Magnus C2</title>
+    </head>
+
+    <body>
+        <div class="center">
+            <h1 class="title">Magnus C2 Server</h1>
+            <input type="text" id="command" name="command" placeholder="Command">
+            <input type="text" id="amount" name="amount" placeholder="Amount">
+            <br>
+            <input type="password" id="key" name="key" placeholder="Key">
+            <br>
+            <br>
+            <button class="sendButton" onclick="checkCredentials()">Send!</button>
+        </div>
+
+        <script>
+            async function checkCredentials() {
+                key = document.getElementById("key").value;
+                command = document.getElementById("command").value;
+                amount = document.getElementById("amount").value;
+
+                var response = await fetch(`${document.URL}/post?key=${encodeURIComponent(key)}&command=${encodeURIComponent(command)}&amount=${encodeURIComponent(amount)}`,
+                    {
+                        method: "POST", headers: { "Accept": "application/json" }
+                    });
+
+                if (response.status == 400) {
+                    alert("Amount skal vaere et gyldigt tal!");
+                } else if (response.status == 429) {
+                    alert("Forket key!");
+                } else if (response.status == 200) {
+                    alert("Kommando sendt!");
+                }
+            }
+        </script>
+    </body>
+
+</html>
