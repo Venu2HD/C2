@@ -5,7 +5,7 @@ from time import sleep
 from os import remove
 
 DELAY = 5
-IP = "127.0.0.1"
+IP = "143.42.110.206"
 PORT = 80
 SCHEME = "http"
 
