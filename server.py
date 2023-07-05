@@ -105,7 +105,7 @@ def post_image_thread(data: bytes) -> None:
 
 
 def check_key(key: str) -> bool:
-    with open("key.txt", "r") as key_file:
+    with open("data/key.txt", "r") as key_file:
         if key_file.read() == hash_key(key):
             return True
     return False
