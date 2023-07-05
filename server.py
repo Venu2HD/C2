@@ -46,15 +46,6 @@ def easter_egg() -> Response:
     return Response("Hey, what are you doing there?", 418)
 
 
-@app.route("/check-key", methods=["GET"])
-def web_check_key() -> Response:
-    result = check_key(request.args.get("key"))
-    if result:
-        return Response("success", 200)
-    else:
-        return Response("invalid key", 403)
-
-
 @app.route("/", methods=["GET"])
 def home() -> str:
     with open("index.html", "r", encoding="utf-8") as index_file:

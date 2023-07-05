@@ -53,35 +53,23 @@
                 const form = event.currentTarget;
                 const formData = new FormData(form);
 
-                checkKey()
-                    .then(checkKeyResult => { if (!checkKeyResult) alert("Forkert key!"); return })
                 key = document.getElementById("key").value;
 
                 fetch(`${document.URL}/post_image?key=${key}`, { "method": "POST", "body": formData })
-                    .then(response => { if (response.status == 200) alert("Billede sendt!"); else alert("Ukendt fejl!"); });
+                    .then(response => {
+                        if (response.status == 200) {
+                            alert("Billede sendt!");
+                        } else if (response.status == 403) {
+                            alert("Forkert key!");
+                        } else {
+                            alert("Ukendt fejl!")
+                        }
+                    });
 
                 event.preventDefault();
             }
 
-            async function checkKey() {
-                key = document.getElementById("key").value;
-
-                response = await fetch(`${document.URL}/check-key?key=${key}`,
-                    {
-                        method: "GET", headers: { "Accept": "application/json" }
-                    });
-                if (response.status == 200) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
             async function sendCommand() {
-                if (await !checkKey()) {
-                    alert("Forkert key!");
-                    return;
-                }
                 key = document.getElementById("key").value;
                 command = document.getElementById("command").value;
                 amount = document.getElementById("amount").value;
@@ -94,6 +82,8 @@
                     alert("Amount skal være et gyldigt tal!");
                 } else if (response.status == 200) {
                     alert("Kommando sendt!");
+                } else if (response.status == 403) {
+                    alert("Forkert key!");
                 } else {
                     alert("Ukendt fejl!");
                 }
