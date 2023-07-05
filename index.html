@@ -38,7 +38,7 @@
             <button class="sendButton" style="background-color: blue;" onclick="sendCommand()">Send
                 Command!</button>
             <h3 class="title">Vis billede</h3>
-            <form enctype="multipart/form-data">
+            <form enctype="multipart/form-data" id="imageForm">
                 <input type="file" id="image" name="image">
                 <br><br>
                 <input type="submit" class="sendButton" style="background-color: greenyellow;" value="Send Billede!">
@@ -48,7 +48,7 @@
         </div>
 
         <script>
-            const form = document.querySelector('form');
+            const form = document.getElementById("imageForm");
             form.onsubmit = function (event) {
                 const form = event.currentTarget;
                 const formData = new FormData(form);
