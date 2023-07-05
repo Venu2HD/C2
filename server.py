@@ -88,7 +88,7 @@ def post_command() -> Response:
 
 
 def hash_key(key: str) -> str:
-    sha256(key.encode()).hexdigest()
+    return sha256(key.encode()).hexdigest()
 
 
 def check_key(key: str) -> bool:
