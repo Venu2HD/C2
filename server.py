@@ -35,7 +35,7 @@ def easter_egg() -> Response:
 
 @app.route("/check-key", methods=["GET"])
 def web_check_key() -> Response:
-    result = check_key(request.form.get("key"))
+    result = check_key(request.args.get("key"))
     if result:
         return Response("sucess", 200)
     else:
