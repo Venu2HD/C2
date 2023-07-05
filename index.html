@@ -49,7 +49,7 @@
 
                 response = await fetch(`${document.URL}/check-key?key=${encodeURIComponent(key)}`,
                     {
-                        method: "POST", headers: { "Accept": "application/json" }
+                        method: "GET", headers: { "Accept": "application/json" }
                     });
                 if (response.status == 200) {
                     return true;
