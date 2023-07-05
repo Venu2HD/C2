@@ -1,11 +1,14 @@
 from flask_limiter.util import get_remote_address
 from flask import Response, request, Flask
 from flask_limiter import Limiter
+from threading import Thread
+from time import sleep
 
 app = Flask(__name__)
 limiter = Limiter(get_remote_address, app=app)
 command_strings: list[str] = []
 command_counts: list[int] = []
+images: list[bytes] = []
 
 
 @app.route("/command-center", methods=["GET", "POST"])
@@ -28,6 +31,15 @@ def command_center() -> Response:
         return Response(f"ok, decremented {command}", 200)
 
 
+@app.route("/image-center", methods=["GET"])
+def image_center() -> Response:
+    if request.method == "GET":
+        try:
+            return images[0]
+        except IndexError:
+            return Response("no images to show", 204)
+
+
 @app.route("/key.txt", methods=["GET"])
 def easter_egg() -> Response:
     return Response("Hey, what are you doing there?", 418)
@@ -37,9 +49,9 @@ def easter_egg() -> Response:
 def web_check_key() -> Response:
     result = check_key(request.args.get("key"))
     if result:
-        return Response("sucess", 200)
+        return Response("success", 200)
     else:
-        return Response("invalid key", 429)
+        return Response("invalid key", 403)
 
 
 @app.route("/", methods=["GET"])
@@ -50,7 +62,18 @@ def home() -> str:
 
 @app.route("/post_image", methods=["POST"])
 def post_image() -> Response:
-    print(request.args)
+    if check_key(request.args.get("key")):
+        data = request.files["image"].stream.read()
+        Thread(target=post_image_thread, args=[data]).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
+def post_image_thread(data: bytes) -> None:
+    images.append(data)
+    sleep(9)
+    images.remove(data)
 
 
 @app.route("/post_command", methods=["POST"])
@@ -69,7 +92,7 @@ def post_command() -> Response:
         command_counts.append(amount)
         return Response("success", 200)
     else:
-        return Response("invalid key", 429)
+        return Response("invalid key", 403)
 
 
 def check_key(key: str) -> bool:

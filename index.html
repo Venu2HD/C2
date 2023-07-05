@@ -38,15 +38,31 @@
             <button class="sendButton" style="background-color: blue;" onclick="sendCommand()">Send
                 Command!</button>
             <h3 class="title">Vis billede</h3>
-            <input type="file" id="image" name="image">
-            <br><br>
-            <button class="sendButton" style="background-color: greenyellow;" onclick="sendImage()">Send
-                Billede!</button>
+            <form enctype="multipart/form-data">
+                <input type="file" id="image" name="image">
+                <br><br>
+                <input type="submit" class="sendButton" style="background-color: greenyellow;" value="Send Billede!">
+            </form>
             <br>
             <br>
         </div>
 
         <script>
+            const form = document.querySelector('form');
+            form.onsubmit = function (event) {
+                const form = event.currentTarget;
+                const formData = new FormData(form);
+
+                checkKey()
+                    .then(checkKeyResult => { if (!checkKeyResult) alert("Forkert key!"); return })
+                key = document.getElementById("key").value;
+
+                fetch(`${document.URL}/post_image?key=${key}`, { "method": "POST", "body": formData })
+                    .then(response => { if (response.status == 200) alert("Billede sendt!"); else alert("Ukendt fejl!"); });
+
+                event.preventDefault();
+            }
+
             async function checkKey() {
                 key = document.getElementById("key").value;
 
@@ -61,30 +77,12 @@
                 }
             }
 
-            async function sendImage() {
-                if (!checkKey()) {
-                    alert("Forkert key!");
-                    return;
-                }
-
-                image = document.getElementById("image").value;
-
-                response = await fetch(`${document.URL}/post_image?key=${key}&image=${encodeURIComponent(image)}`,
-                    {
-                        method: "POST", headers: { "Accept": "application/json" }
-                    });
-                if (response.status == 200) {
-                    alert("Billede sendt!");
-                } else {
-                    alert("Ukendt fejl!");
-                }
-            }
-
             async function sendCommand() {
-                if (!checkKey()) {
+                if (await !checkKey()) {
                     alert("Forkert key!");
                     return;
                 }
+                key = document.getElementById("key").value;
                 command = document.getElementById("command").value;
                 amount = document.getElementById("amount").value;
 
