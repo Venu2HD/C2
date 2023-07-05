@@ -2,6 +2,7 @@ from flask_limiter.util import get_remote_address
 from flask import Response, request, Flask
 from flask_limiter import Limiter
 from threading import Thread
+from hashlib import sha256
 from time import sleep
 
 app = Flask(__name__)
@@ -95,9 +96,13 @@ def post_command() -> Response:
         return Response("invalid key", 403)
 
 
+def hash_key(key: str) -> str:
+    sha256(key.encode()).hexdigest()
+
+
 def check_key(key: str) -> bool:
     with open("key.txt", "r") as key_file:
-        if key_file.read() == key:
+        if key_file.read() == hash_key(key):
             return True
     return False
 
