@@ -25,7 +25,7 @@ def command_center() -> Response:
             commands.remove(command)
         except ValueError:
             return Response("command doesnt exist", 400)
-        return Response(f"ok, removed {command}", 200)
+        return Response(f"removed {command}", 200)
 
 
 @app.route("/image-center", methods=["GET"])
