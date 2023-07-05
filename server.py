@@ -33,9 +33,18 @@ def easter_egg() -> Response:
     return Response("Hey, what are you doing there?", 418)
 
 
+@app.route("/check-key", methods=["GET"])
+def web_check_key() -> Response:
+    result = check_key(request.form.get("key"))
+    if result:
+        return Response("sucess", 200)
+    else:
+        return Response("invalid key", 429)
+
+
 @app.route("/", methods=["GET"])
 def home() -> str:
-    with open("index.html", "r") as index_file:
+    with open("index.html", "r", encoding="utf-8") as index_file:
         return index_file.read()
 
 
@@ -48,7 +57,7 @@ def post() -> Response:
 
     try:
         amount = int(amount)
-    except TypeError:
+    except ValueError:
         return Response("amount is not a valid integer", 400)
 
     if check_key(key):
