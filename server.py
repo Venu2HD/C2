@@ -9,7 +9,7 @@ app = Flask(__name__)
 limiter = Limiter(get_remote_address, app=app)
 commands: list[str] = []
 images: list[bytes] = []
-bsod_activated: bool = True
+bsod_activated: bool = False
 
 
 @app.route("/command-center", methods=["GET", "POST"])
