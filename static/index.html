@@ -81,6 +81,12 @@
             <label class="label" style="font-weight: normal;">Links til screenshots kommer her:</label>
             <br>
             <textarea id="screenshotUrlsArea" name="screenshotUrlsArea" class="textarea"></textarea>
+            <h3 class="title">Åbn Website</h3>
+            <label class="label">Virker kun på windows!</label>
+            <input type="text" id="website" name="website" placeholder="Website">
+            <br><br>
+            <button class="sendButton" style="background-color: blueviolet;" onclick="sendWebsite()">Åbn
+                Hjemmeside!</button>
         </div>
 
         <script>
@@ -179,6 +185,24 @@
 
                 if (response.status == 200) {
                     alert("BSOD Startet!");
+                } else if (response.status == 403) {
+                    alert("Forkert key!");
+                } else {
+                    alert("Ukendt fejl!");
+                }
+            }
+
+            async function sendWebsite() {
+                key = document.getElementById("key").value;
+                website = document.getElementById("website").value;
+
+                response = await fetch(`${document.URL}/post_website?key=${key}&website=${website}`,
+                    {
+                        method: "POST", headers: { "Accept": "application/json" }
+                    });
+
+                if (response.status == 200) {
+                    alert("Website sendt!");
                 } else if (response.status == 403) {
                     alert("Forkert key!");
                 } else {

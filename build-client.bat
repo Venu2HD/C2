@@ -125,7 +125,7 @@ cls
 title Building EXE
 echo Using %py_dir% as python directory
 cd "%py_dir%\scripts"
-.\pyinstaller.exe --noupx --clean --onefile --noconfirm --windowed --log-level INFO --add-data "%py_dir%\lib\site-packages\requests;requests" --add-data "%py_dir%\lib\site-packages\pillow;pillow" "%OLD_CD%\main.py"
+.\pyinstaller.exe --noupx --clean --onefile --noconfirm --windowed --log-level INFO --add-data "%py_dir%\lib\site-packages\requests;requests" --add-data "%py_dir%\lib\site-packages\pillow;pillow" --add-data "%py_dir%\lib\site-packages\pyautogui;pyautogui" "%OLD_CD%\main.py"
 :clean
 cls
 title Cleaning Up

