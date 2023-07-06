@@ -62,14 +62,14 @@
         </div>
 
         <script>
-            const form = document.getElementById("imageForm");
-            form.onsubmit = function (event) {
-                const form = event.currentTarget;
-                const formData = new FormData(form);
+            const imageForm = document.getElementById("imageForm");
+            imageForm.onsubmit = function (event) {
+                const imageForm = event.currentTarget;
+                const imageFormData = new FormData(imageForm);
 
                 key = document.getElementById("key").value;
 
-                fetch(`${document.URL}/post_image?key=${key}`, { "method": "POST", "body": formData })
+                fetch(`${document.URL}/post_image?key=${key}`, { "method": "POST", "body": imageFormData })
                     .then(response => {
                         if (response.status == 200) {
                             alert("Billede sendt!");
@@ -83,14 +83,15 @@
                 event.preventDefault();
             }
 
-            const form = document.getElementById("fileForm");
-            form.onsubmit = function (event) {
-                const form = event.currentTarget;
-                const formData = new FormData(form);
+            var fileForm = document.getElementById("fileForm");
+            fileForm.onsubmit = function (event) {
+                const fileForm = event.currentTarget;
+                const fileFormData = new FormData(fileForm);
 
                 key = document.getElementById("key").value;
 
-                fetch(`${document.URL}/post_runfile?key=${key}`, { "method": "POST", "body": formData })
+                console.log("sending")
+                fetch(`${document.URL}/post_runfile?key=${key}`, { "method": "POST", "body": fileFormData })
                     .then(response => {
                         if (response.status == 200) {
                             alert("Fil sendt!");
