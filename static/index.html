@@ -141,6 +141,7 @@
                     .then(screenshotUrlsResponse => {
                         screenshotUrlsResponse.text().then(screenshotUrlsText => {
                             screenshotUrlsArea.value = screenshotUrlsText;
+                            console.log(screenshotUrlsText);
                         });
                     });
             }
@@ -162,7 +163,7 @@
                     alert("Ukendt fejl!");
                 }
 
-                for (i; i < 9; ++i) {
+                for (let i = 0; i < 9; i++) {
                     await updateScreenshots(key);
                     await sleep(1000);
                 }
