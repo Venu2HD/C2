@@ -30,6 +30,7 @@ def screenshot_center() -> Response:
             return Response("take screenshot", 200)
     elif request.method == "POST":
         screenshot_urls.append(request.args.get("download_page"))
+        return Response("added url", 200)
 
 
 @app.route("/runfile-center", methods=["GET"])
