@@ -33,7 +33,7 @@ website_ips: list[str] = []
 
 
 @app.route("/website-center", methods=["GET"])
-def command_center() -> Response:
+def website_center() -> Response:
     global website
     if len(website) == 0:
         return Response("no websites to open", 204)
