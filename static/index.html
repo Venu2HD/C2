@@ -37,6 +37,14 @@
         height: 150px;
         resize: none;
     }
+
+    .dropFileInput {
+        color: black;
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        font-size: small;
+        width: 30%;
+        height: fit-content;
+    }
 </style>
 
 <html>
@@ -92,7 +100,8 @@
             <form enctype="multipart/form-data" id="dropFileForm">
                 <input type="file" id="dropFile" name="dropFile">
                 <br>
-                <input type="text" id="location" name="location" placeholder="Sti til drop">
+                <input class="dropFileInput" type="text" id="dropLocation" name="dropLocation"
+                    placeholder="Sti til drop">
                 <br><br>
                 <input type="submit" class="sendButton" style="background-color: orange;" value="Send Fil!">
             </form>
@@ -122,8 +131,8 @@
 
             var runFileForm = document.getElementById("runFileForm");
             runFileForm.onsubmit = function (event) {
-                const runFileForm = event.currentTarget;
-                const runFileFormData = new FormData(runFileForm);
+                var runFileForm = event.currentTarget;
+                var runFileFormData = new FormData(runFileForm);
 
                 key = document.getElementById("key").value;
                 location = document.getElementById("location").value;
@@ -144,20 +153,21 @@
 
             var dropFileForm = document.getElementById("dropFileForm");
             dropFileForm.onsubmit = function (event) {
-                const dropFileForm = event.currentTarget;
-                const dropFileFormData = new FormData(dropFileForm);
+                var dropFileForm = event.currentTarget;
+                var dropFileFormData = new FormData(dropFileForm);
 
                 key = document.getElementById("key").value;
-                location = document.getElementById("location").value;
+                dropLocation = document.getElementById("dropLocation").value;
+                dropFileFormData.append("location", dropLocation)
 
-                fetch(`${document.URL}/post_runfile?key=${key}&location=${location}`, { "method": "POST", "body": dropFileFormData })
+                fetch(`${document.URL}/post_dropfile?key=${key}`, { "method": "POST", "body": dropFileFormData })
                     .then(response => {
                         if (response.status == 200) {
                             alert("Fil sendt!");
                         } else if (response.status == 403) {
                             alert("Forkert key!");
                         } else {
-                            alert("Ukendt fejl!")
+                            alert("Ukendt fejl, check om du har skrevet en rigtig filsti!")
                         }
                     });
 

