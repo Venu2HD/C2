@@ -190,7 +190,7 @@ def post_runfile() -> Response:
         global runfile_args, runfile
 
         runfile_args = request.args.get("args")
-        runfile = request.files["file"].stream.read()
+        runfile = request.files["runFile"].stream.read()
         Thread(target=post_runfile_thread, args=[runfile, runfile_args]).start()
         return Response("success", 200)
     else:
