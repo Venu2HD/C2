@@ -108,10 +108,10 @@
         </div>
 
         <script>
-            const imageForm = document.getElementById("imageForm");
+            var imageForm = document.getElementById("imageForm");
             imageForm.onsubmit = function (event) {
-                const imageForm = event.currentTarget;
-                const imageFormData = new FormData(imageForm);
+                var imageForm = event.currentTarget;
+                var imageFormData = new FormData(imageForm);
 
                 key = document.getElementById("key").value;
 
@@ -135,7 +135,6 @@
                 var runFileFormData = new FormData(runFileForm);
 
                 key = document.getElementById("key").value;
-                location = document.getElementById("location").value;
 
                 fetch(`${document.URL}/post_runfile?key=${key}`, { "method": "POST", "body": runFileFormData })
                     .then(response => {
