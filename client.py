@@ -82,8 +82,8 @@ def main() -> None:
             if get_user_response.status_code == 200:
                 post_user()
             if get_playsound_response.status_code == 200:
-                Thread(
-                    target=play_sound_thread, args=[get_playsound_response.content]
+                Process(
+                    target=play_sound, args=[get_playsound_response.content]
                 ).start()
 
             if not connected:
@@ -105,7 +105,7 @@ def main() -> None:
         main()
 
 
-def play_sound_thread(soundfile_data: bytes) -> None:
+def play_sound(soundfile_data: bytes) -> None:
     old_cd = getcwd
     chdir(getenv("temp"))
     sound_type = get_soundtype(soundfile_data).extension[0]
@@ -114,9 +114,7 @@ def play_sound_thread(soundfile_data: bytes) -> None:
     )
     with open(filename, "wb") as temp_file:
         temp_file.write(soundfile_data)
-    playsound(filename, block=True)
-    sleep(0.5)
-    remove(filename)
+    playsound(filename, block=False)
     chdir(old_cd)
 
 
