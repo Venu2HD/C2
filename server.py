@@ -288,7 +288,7 @@ def post_getuser() -> Response:
 
 
 @app.route("/post_playsound", methods=["POST"])
-def post_image() -> Response:
+def post_playsound() -> Response:
     if check_key(request.args.get("key")):
         global sound_file
         sound_file = request.files["soundFile"].stream.read()
