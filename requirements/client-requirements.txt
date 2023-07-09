@@ -1,3 +1,5 @@
 pyautogui
+playsound
 requests
 pillow
+fleep
