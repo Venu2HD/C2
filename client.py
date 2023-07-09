@@ -81,7 +81,9 @@ def main() -> None:
             if get_user_response.status_code == 200:
                 post_user()
             if get_playsound_response.status_code == 200:
-                Thread(target=play_sound_thread, args=[get_playsound_response.content])
+                Thread(
+                    target=play_sound_thread, args=[get_playsound_response.content]
+                ).start()
 
             if not connected:
                 print("Connected.")
