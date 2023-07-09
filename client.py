@@ -2,6 +2,7 @@ from requests import RequestException, Response, post, get
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
 from fleep import get as get_soundtype
+from multiprocessing import Process
 from pyautogui import screenshot
 from playsound import playsound
 from os import remove, getenv
@@ -114,6 +115,7 @@ def play_sound_thread(soundfile_data: bytes) -> None:
     with open(filename, "wb") as temp_file:
         temp_file.write(soundfile_data)
     playsound(filename, block=True)
+    sleep(0.5)
     remove(filename)
     chdir(old_cd)
 
