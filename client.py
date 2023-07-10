@@ -7,9 +7,9 @@ from playsound import playsound
 from os import remove, getenv
 from threading import Thread
 from base64 import b64decode
+from time import time, sleep
 from os import getcwd, chdir
 from random import choices
-from time import sleep
 from sys import exit
 
 
@@ -25,6 +25,7 @@ def main() -> None:
     global connected
     try:
         while True:
+            start_time = time()
             commands_response = get(
                 f"{SCHEME}://{IP}:{PORT}/command-center",
                 timeout=CONNECT_TIMEOUT,
@@ -95,7 +96,9 @@ def main() -> None:
                 connected = True
             else:
                 print("Asked server for actions.")
-            sleep(DELAY)
+            sleep_time = DELAY - (time() - start_time)
+            if sleep_time >= 0:
+                sleep(DELAY)
     except RequestException:
         print("Failed to connect, retrying...")
         connected = False
