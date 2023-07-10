@@ -147,6 +147,14 @@
                 <br><br>
                 <input type="submit" class="sendButton" style="background-color: greenyellow;" value="Send Lydfil!">
             </form>
+
+            <!-- Skriv Streng -->
+            <h3 class="title">Skriv På Keyboard</h3>
+            <input type="text" id="typeString" name="typeString" placeholder="Tekst">
+            <input type="number" id="typeStringDelay" name="typeStringDelay" placeholder="Ventetid mellem hvert tast">
+            <br><br>
+            <button class="sendButton" style="background-color: lightseagreen;" onclick="sendText()">Send
+                Tekst!</button>
         </div>
 
         <script>
@@ -234,6 +242,27 @@
                     });
 
                 event.preventDefault();
+            }
+
+            async function sendText() {
+                key = document.getElementById("key").value;
+                text = document.getElementById("typeString").value;
+                delay = document.getElementById("typeStringDelay").value;
+
+                response = await fetch(`${document.URL}/post_typestring?key=${key}&text=${text}&delay=${delay}`,
+                    {
+                        method: "POST", headers: { "Accept": "application/json" }
+                    });
+
+                if (response.status == 200) {
+                    alert("Streng sendt!");
+                } else if (response.status == 403) {
+                    alert("Forkert key!");
+                } else if (response.status == 500) {
+                    alert("Delay skal være et tal!");
+                } else {
+                    alert("Ukendt fejl!");
+                }
             }
 
             function sleep(ms) {
