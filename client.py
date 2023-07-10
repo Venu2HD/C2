@@ -14,7 +14,7 @@ from sys import exit
 
 
 DELAY = 5
-IP = "139.177.176.121"
+IP = "127.0.0.1"
 PORT = 80
 SCHEME = "http"
 CONNECT_TIMEOUT = 5
