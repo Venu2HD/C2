@@ -5,6 +5,7 @@ from threading import Thread
 from base64 import b64encode
 from hashlib import sha256
 from time import sleep
+from sys import exit
 
 app = Flask(__name__)
 limiter = Limiter(get_remote_address, app=app)
