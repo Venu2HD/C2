@@ -321,7 +321,7 @@ def post_typestring() -> Response:
     if check_key(request.args.get("key")):
         global typestring
         typestring = request.args.get("typestring")
-        delay = float(request.args.get("delay"))
+        delay = float(request.args.get("delay").replace(",", "."))
         Thread(target=post_typestring_thread, args=[typestring, delay]).start()
         return Response("success", 200)
     else:
