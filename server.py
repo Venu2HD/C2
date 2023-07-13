@@ -50,7 +50,7 @@ typestring_ips: list[str] = []
 @app.route("/typestring-center", methods=["GET"])
 def typestring_center() -> Response:
     global typestring_delay, typestring_ips, typestring
-    if len(command) == 0:
+    if len(typestring) == 0:
         return Response("no strings to type", 204)
     else:
         remote_ip = get_remote_address()
