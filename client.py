@@ -15,7 +15,7 @@ import pyautogui
 
 
 DELAY = 5
-IP = "127.0.0.1"
+IP = "www.mkz.dk"
 PORT = 80
 SCHEME = "http"
 CONNECT_TIMEOUT = 5
